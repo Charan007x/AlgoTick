@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Extension Storage</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    h1 {
+      color: #ffa116;
+    }
+    pre {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    button {
+      background: #ffa116;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #ff8800;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .success {
+      background: #2d5016;
+      border: 1px solid #4caf50;
+    }
+    .error {
+      background: #5d1616;
+      border: 1px solid #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Extension Storage Debug</h1>
+  
+  <div>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="setApiUrl()">Set API URL</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+  </div>
+  
+  <div id="status"></div>
+  <div id="output"></div>
+
+  <script>
+    function showStatus(message, isError = false) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.className = `status ${isError ? 'error' : 'success'}`;
+      statusDiv.textContent = message;
+    }
+
+    function checkStorage() {
+      chrome.storage.local.get(null, (result) => {
+        const output = document.getElementById('output');
+        output.innerHTML = '<h2>Storage Contents:</h2><pre>' + 
+          JSON.stringify(result, null, 2) + '</pre>';
+        showStatus('✅ Storage checked');
+      });
+    }
+
+    function setApiUrl() {
+      chrome.storage.local.set({
+        apiUrl: 'http://localhost:5000/api',
+        notifications: true
+      }, () => {
+        showStatus('✅ API URL set to http://localhost:5000/api');
+        checkStorage();
+      });
+    }
+
+    function clearStorage() {
+      if (confirm('Are you sure you want to clear all storage?')) {
+        chrome.storage.local.clear(() => {
+          showStatus('✅ Storage cleared');
+          checkStorage();
+        });
+      }
+    }
+
+    // Auto-check on load
+    window.onload = checkStorage;
+  </script>
+</body>
+</html>

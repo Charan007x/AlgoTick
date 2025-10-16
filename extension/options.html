@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode Tracker - Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section h2 {
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group .helper-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .toggle-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .toggle-group label {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .toggle-group .description {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .stats-info {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .stats-info h3 {
+      color: #667eea;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .stats-info p {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Settings</h1>
+    <p class="subtitle">Customize your LeetCode Tracker experience</p>
+
+    <div id="message" class="message"></div>
+
+    <!-- API Configuration -->
+    <div class="section">
+      <h2>API Configuration</h2>
+      <div class="form-group">
+        <label>Backend API URL</label>
+        <input type="text" id="apiUrl" placeholder="http://localhost:5000/api">
+        <p class="helper-text">Change this if you deploy your backend to a different server</p>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="section">
+      <h2>Notifications</h2>
+      <div class="toggle-group">
+        <div>
+          <label>Enable Notifications</label>
+          <p class="description">Get notified when you add problems and for daily reminders</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notifications" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Theme (Future feature) -->
+    <div class="section">
+      <h2>Display</h2>
+      <div class="toggle-group">
+        <div>
+          <label>Auto-detect Problem Info</label>
+          <p class="description">Automatically show add button on LeetCode problem pages</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoDetect" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="section">
+      <h2>About</h2>
+      <div class="stats-info">
+        <h3>LeetCode Tracker v1.0</h3>
+        <p>
+          Track your LeetCode progress with spaced repetition. Add problems directly from LeetCode,
+          get reminders for revision, and never forget what you've learned.
+        </p>
+        <p style="margin-top: 10px;">
+          <strong>Features:</strong><br>
+          • Add problems via number, URL, or slug<br>
+          • Spaced repetition reminders (7 days, 30 days)<br>
+          • Track revision history<br>
+          • Dashboard with statistics<br>
+          • One-click add from LeetCode pages
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+    <button class="btn btn-danger" id="clearDataBtn">Clear All Data</button>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

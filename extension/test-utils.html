@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Extension Utilities</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .test-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 5px;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .result {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .success {
+      color: #4ade80;
+    }
+    .error {
+      color: #f87171;
+    }
+    .info {
+      color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Extension Test Lab</h1>
+    <p>Test the unified extension architecture</p>
+
+    <div class="test-section">
+      <h2>📦 Storage Tests</h2>
+      <button onclick="testStorage()">Test Storage</button>
+      <button onclick="clearStorage()">Clear Storage</button>
+      <div id="storageResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🔐 Auth Tests</h2>
+      <button onclick="testAuth()">Check Auth Status</button>
+      <button onclick="testLogin()">Test Login Flow</button>
+      <div id="authResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>➕ Add Question Tests</h2>
+      <input type="text" id="problemInput" placeholder="two-sum or 1" 
+             style="padding: 10px; width: 200px; border-radius: 5px; border: none; margin: 5px;">
+      <button onclick="testAddQuestion()">Add Question</button>
+      <div id="addResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>📨 Message Tests</h2>
+      <button onclick="testMessage()">Test Content → Background</button>
+      <div id="messageResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🔄 Service Worker Status</h2>
+      <button onclick="checkServiceWorker()">Check Status</button>
+      <div id="workerResult" class="result"></div>
+    </div>
+  </div>
+
+  <script src="utils.js"></script>
+  <script>
+    function log(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      const timestamp = new Date().toLocaleTimeString();
+      const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+      element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+    }
+
+    async function testStorage() {
+      const result = document.getElementById('storageResult');
+      result.innerHTML = '';
+      
+      try {
+        log('storageResult', '🔍 Testing storage...', 'info');
+        
+        // Test set
+        await storage.set('test_key', 'test_value');
+        log('storageResult', '✅ Set test_key = test_value', 'success');
+        
+        // Test get
+        const value = await storage.get('test_key');
+        log('storageResult', `✅ Got test_key = ${value}`, 'success');
+        
+        // Get all
+        const all = await storage.getMultiple(['token', 'user', 'apiUrl', 'test_key']);
+        log('storageResult', `📦 All storage: ${JSON.stringify(all, null, 2)}`, 'info');
+        
+      } catch (error) {
+        log('storageResult', `❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function clearStorage() {
+      const result = document.getElementById('storageResult');
+      if (confirm('Clear ALL extension storage?')) {
+        try {
+          await storage.clear();
+          log('storageResult', '✅ Storage cleared', 'success');
+        } catch (error) {
+          log('storageResult', `❌ Error: ${error.message}`, 'error');
+        }
+      }
+    }
+
+    async function testAuth() {
+      const result = document.getElementById('authResult');
+      result.innerHTML = '';
+      
+      try {
+        log('authResult', '🔐 Checking authentication...', 'info');
+        const isAuth = await checkAuth();
+        
+        if (isAuth) {
+          log('authResult', '✅ User is authenticated!', 'success');
+          const user = await storage.get('user');
+          log('authResult', `👤 User: ${JSON.stringify(user, null, 2)}`, 'info');
+        } else {
+          log('authResult', '❌ Not authenticated', 'error');
+        }
+      } catch (error) {
+        log('authResult', `❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function testLogin() {
+      const result = document.getElementById('authResult');
+      result.innerHTML = '';
+      log('authResult', '⚠️ This is a test - use extension popup to login', 'info');
+    }
+
+    async function testAddQuestion() {
+      const result = document.getElementById('addResult');
+      result.innerHTML = '';
+      const input = document.getElementById('problemInput').value.trim();
+      
+      if (!input) {
+        log('addResult', '⚠️ Please enter a problem slug or number', 'error');
+        return;
+      }
+      
+      try {
+        log('addResult', `➕ Adding question: ${input}`, 'info');
+        const response = await addQuestionToTracker(input);
+        log('addResult', `✅ Success! ${JSON.stringify(response, null, 2)}`, 'success');
+      } catch (error) {
+        log('addResult', `❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function testMessage() {
+      const result = document.getElementById('messageResult');
+      result.innerHTML = '';
+      
+      try {
+        log('messageResult', '📨 Sending message to background...', 'info');
+        
+        chrome.runtime.sendMessage(
+          { action: 'checkAuth' },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              log('messageResult', `❌ Error: ${chrome.runtime.lastError.message}`, 'error');
+            } else {
+              log('messageResult', `✅ Response: ${JSON.stringify(response, null, 2)}`, 'success');
+            }
+          }
+        );
+      } catch (error) {
+        log('messageResult', `❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function checkServiceWorker() {
+      const result = document.getElementById('workerResult');
+      result.innerHTML = '';
+      
+      log('workerResult', '🔍 Checking service worker...', 'info');
+      log('workerResult', '⚠️ Open chrome://extensions/ and check "Service Worker" status', 'info');
+      log('workerResult', '✅ Should see: "Service worker (active)"', 'info');
+      log('workerResult', '🔄 Should see keepalive pings in console', 'info');
+    }
+
+    // Auto-run on load
+    window.onload = () => {
+      log('storageResult', 'Ready to test! Click buttons above.', 'info');
+    };
+  </script>
+</body>
+</html>
