@@ -172,7 +172,126 @@ Complete this checklist before deploying to production.
 - [ ] Monitor for errors
 - [ ] Be ready to rollback if needed
 
-## ✅ Go/No-Go Decision
+## ✅ DEPLOYMENT CHECKLIST - UPDATED
+
+## 🎯 STEP 1: Google Cloud Console
+
+https://console.cloud.google.com/apis/credentials
+
+1. Find your OAuth 2.0 Client ID
+2. Click to edit
+
+### Add These EXACT URLs:
+
+**Authorized JavaScript origins:**
+- `https://algotick.vercel.app`
+- `https://algotick.onrender.com`
+
+**Authorized redirect URIs:**
+- `https://algotick.onrender.com/api/auth/google/callback`
+
+**Click SAVE** ✅
+
+---
+
+## 🎯 STEP 2: Render Backend
+
+https://dashboard.render.com/
+
+1. Find your backend service
+2. Click **Environment** tab
+3. Add/Update these variables:
+
+```
+GOOGLE_CALLBACK_URL = https://algotick.onrender.com/api/auth/google/callback
+FRONTEND_URL = https://algotick.vercel.app
+LANDING_URL = https://algotick.vercel.app
+```
+
+**Plus your existing:**
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `JWT_SECRET`
+- `SESSION_SECRET`
+- `MONGODB_URI`
+- `NODE_ENV=production`
+
+**Click Save Changes** ✅
+
+---
+
+## 🎯 STEP 3: Vercel Frontend
+
+https://vercel.com/dashboard
+
+1. Find your **algotick** project
+2. Go to **Settings** → **Environment Variables**
+3. Make sure you have:
+
+```
+REACT_APP_API_URL = https://algotick.onrender.com/api
+REACT_APP_GOOGLE_CLIENT_ID = [your-client-id]
+```
+
+4. Go to **Deployments** tab
+5. Click **•••** on latest → **Redeploy**
+
+---
+
+## 🎯 STEP 4: Wait & Test
+
+1. Wait 5 minutes for changes to propagate
+2. Go to `https://algotick.vercel.app`
+3. Test signup/login
+4. Test Google OAuth
+
+---
+
+## 🐛 Quick Debug
+
+### If Google OAuth shows policy error:
+- Double-check redirect URI in Google Console
+- Must be EXACT: `https://algotick.onrender.com/api/auth/google/callback`
+- Wait 5-10 minutes after saving
+
+### If regular login doesn't work:
+- Check `REACT_APP_API_URL` in Vercel
+- Check browser console for errors
+- Check Render logs for backend errors
+
+### If redirects to login after OAuth:
+- Vercel needs to redeploy with latest code
+- Check browser console for token errors
+
+---
+
+## 📝 Your Environment Variables Summary
+
+### Render Backend (9 variables):
+1. `NODE_ENV=production`
+2. `MONGODB_URI=...`
+3. `JWT_SECRET=...`
+4. `SESSION_SECRET=...`
+5. `GOOGLE_CLIENT_ID=...`
+6. `GOOGLE_CLIENT_SECRET=...`
+7. `GOOGLE_CALLBACK_URL=https://algotick.onrender.com/api/auth/google/callback`
+8. `FRONTEND_URL=https://algotick.vercel.app`
+9. `LANDING_URL=https://algotick.vercel.app`
+
+### Vercel Frontend (2 variables):
+1. `REACT_APP_API_URL=https://algotick.onrender.com/api`
+2. `REACT_APP_GOOGLE_CLIENT_ID=...`
+
+---
+
+## ✅ All Routes Are Production-Ready!
+
+✅ Frontend uses `REACT_APP_API_URL` for all API calls  
+✅ Backend uses `FRONTEND_URL` for redirects  
+✅ Backend uses `GOOGLE_CALLBACK_URL` for OAuth  
+✅ No hardcoded localhost URLs in production  
+
+**Follow the 4 steps above and everything will work!** 🚀
 
 **Ready for Production?**
 - All critical items checked: YES / NO
