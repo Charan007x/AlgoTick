@@ -33,7 +33,7 @@ const Settings = () => {
 
   const extractUsername = (input) => {
     // If it's a URL, extract the username from it
-    const urlPattern = /leetcode\.com\/u\/([^\/]+)/i;
+    const urlPattern = /leetcode\.com\/u\/([^/]+)/i;
     const match = input.match(urlPattern);
     if (match) {
       return match[1];
