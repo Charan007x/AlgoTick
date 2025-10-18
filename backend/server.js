@@ -22,9 +22,17 @@ const { checkReminders } = require('./services/reminderService');
 
 const app = express();
 
+// Get allowed origins from environment variables
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.LANDING_URL,
+  'http://localhost:3000', // Dev frontend
+  'http://localhost:3001'  // Dev landing
+].filter(Boolean); // Remove undefined values
+
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());

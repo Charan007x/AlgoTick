@@ -188,7 +188,7 @@ router.get('/google',
 router.get('/google/callback',
   passport.authenticate('google', { 
     session: false,
-    failureRedirect: 'http://localhost:3000/login?error=oauth_failed'
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=oauth_failed`
   }),
   (req, res) => {
     try {
@@ -200,10 +200,12 @@ router.get('/google/callback',
       );
       
       // Redirect to frontend with token
-      res.redirect(`http://localhost:3000/oauth-callback?token=${token}`);
+      const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+      res.redirect(`${frontendURL}/oauth-callback?token=${token}`);
     } catch (error) {
       console.error('OAuth callback error:', error);
-      res.redirect('http://localhost:3000/login?error=oauth_failed');
+      const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+      res.redirect(`${frontendURL}/login?error=oauth_failed`);
     }
   }
 );
