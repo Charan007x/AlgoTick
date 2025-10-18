@@ -185,11 +185,34 @@ function injectAddButton() {
       
     } catch (error) {
       console.error('Error adding problem:', error);
-      showNotification(error.message || 'Failed to add problem', 'error');
+      
+      // Reset button state
       button.disabled = false;
       button.style.opacity = '1';
       button.style.cursor = 'pointer';
       button.textContent = '+ Add to Tracker';
+      
+      // Show appropriate error message
+      const errorMessage = error.message || 'Failed to add problem';
+      
+      if (errorMessage.includes('Extension reloaded') || 
+          errorMessage.includes('context invalidated') ||
+          errorMessage.includes('Receiving end does not exist')) {
+        showNotification('⚠️ Extension was reloaded', 'error');
+        button.textContent = '🔄 Refresh Page';
+        button.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+        
+        // Make button trigger page reload
+        button.onclick = () => {
+          window.location.reload();
+        };
+        
+        setTimeout(() => {
+          showNotification('🔄 Click button or refresh page', 'error');
+        }, 2000);
+      } else {
+        showNotification(errorMessage, 'error');
+      }
     }
   });
   
