@@ -7,18 +7,16 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const LANDING_URL = process.env.REACT_APP_LANDING_URL || 'http://localhost:3001';
-
   const handleLogout = () => {
     logout();
-    window.location.href = LANDING_URL;
+    navigate('/');
   };
 
   const handleLogoClick = () => {
     if (user) {
       navigate('/dashboard');
     } else {
-      window.location.href = LANDING_URL;
+      navigate('/');
     }
   };
 
