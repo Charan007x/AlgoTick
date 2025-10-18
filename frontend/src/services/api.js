@@ -17,9 +17,23 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for logging
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, 
+      response.data?.list ? { questionsCount: response.data.list.questions?.length } : 'OK');
+    return response;
+  },
+  (error) => {
+    console.error('API Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.data);
     return Promise.reject(error);
   }
 );
@@ -40,6 +54,19 @@ export const questionsAPI = {
   markRevised: (id) => api.put(`/questions/${id}/revise`),
   deleteQuestion: (id) => api.delete(`/questions/${id}`),
   getDashboardStats: () => api.get('/questions/stats/dashboard'),
+};
+
+// Lists API
+export const listsAPI = {
+  getLists: () => api.get('/lists'),
+  createList: (data) => api.post('/lists', data),
+  getList: (id) => api.get(`/lists/${id}`),
+  updateList: (id, data) => api.put(`/lists/${id}`, data),
+  deleteList: (id) => api.delete(`/lists/${id}`),
+  addQuestionToList: (id, data) => api.post(`/lists/${id}/add-question`, data),
+  removeQuestionFromList: (id, questionNumber) => api.delete(`/lists/${id}/questions/${questionNumber}`),
+  addQuestionToToday: (id, data) => api.post(`/lists/${id}/add-question-to-today`, data),
+  addAllToToday: (id) => api.post(`/lists/${id}/add-all-to-today`),
 };
 
 export default api;

@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "name": "algotick-frontend",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "@react_app_api_url",
+    "REACT_APP_GOOGLE_CLIENT_ID": "@react_app_google_client_id"
+  }
+}

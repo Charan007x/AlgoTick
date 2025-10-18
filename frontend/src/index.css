@@ -5,6 +5,11 @@
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;
+    /* Ensure consistent emoji rendering across platforms */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      'Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji',
+      sans-serif;
   }
 }
 
@@ -41,3 +46,128 @@
     @apply bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium;
   }
 }
+
+/* Dark theme select dropdowns */
+select option {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 8px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background: linear-gradient(to right, #61dca3, #61b3dc);
+  color: black;
+}
+
+/* Smooth Animations - Consistent System */
+@layer utilities {
+  /* Primary Fade In Animation (Universal) */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  /* Stagger Delays - For Sequential Animations */
+  .delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .delay-300 {
+    animation-delay: 0.3s;
+  }
+
+  .delay-400 {
+    animation-delay: 0.4s;
+  }
+
+  .delay-500 {
+    animation-delay: 0.5s;
+  }
+
+  .delay-600 {
+    animation-delay: 0.6s;
+  }
+
+  /* Scale In - For Modals and Cards */
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+
+  /* Slide In - For Alerts and Notifications */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slideIn {
+    animation: slideIn 0.4s ease-out forwards;
+  }
+
+  /* Shake - For Error Messages */
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(5px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  /* Smooth Transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Initial state for animated elements */
+.animate-fadeIn,
+.animate-scaleIn,
+.animate-slideIn {
+  opacity: 0;
+}
+

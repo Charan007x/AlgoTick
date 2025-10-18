@@ -46,6 +46,10 @@ const questionSchema = new mongoose.Schema({
   notes: {
     type: String,
     default: ''
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -54,6 +58,7 @@ const questionSchema = new mongoose.Schema({
 // Index for faster queries
 questionSchema.index({ userId: 1, dateAdded: -1 });
 questionSchema.index({ userId: 1, nextReminders: 1 });
+questionSchema.index({ userId: 1, isDeleted: 1 });
 
 // Method to calculate next reminder dates
 questionSchema.methods.setReminders = function() {

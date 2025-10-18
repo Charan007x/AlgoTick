@@ -1,52 +1,74 @@
-# 💡 LeetCode Revision Tracker
+# ✓ AlgoTick - Never Forget What You Solved
 
-A full-stack MERN application to track your solved LeetCode problems and automatically remind you to revise them after 7 days and 30 days. Stay consistent with your coding practice!
+A full-stack MERN application to master LeetCode problems with proven spaced repetition. Track, revise, and build lasting coding skills.
 
 ## ✨ Features
 
 ### 🎯 Core Features
-- **Smart Question Tracking**: Add LeetCode questions via URL or problem slug
-- **Automated Reminders**: Get reminders after 7 days and 30 days
-- **LeetCode API Integration**: Automatically fetch problem details (title, difficulty, tags)
-- **Progress Dashboard**: Visual stats showing your progress and upcoming reviews
-- **Intelligent Filtering**: Filter by pending, revised, due soon, or overdue
-- **JWT Authentication**: Secure user authentication and authorization
+- **Smart Question Tracking**: Add via LeetCode URL, slug, or question number
+- **Spaced Repetition**: Automatic reminders (1 day, 1 week, 1 month)
+- **Auto Verification**: Checks your last 20 LeetCode submissions
+- **Custom Lists**: Create themed question lists and add to daily practice
+- **Soft Delete**: Preserve revision history even after deleting
+- **Activity Heatmap**: GitHub-style 12-month contribution graph
 
-### 📊 Dashboard Insights
-- Total questions solved
-- Questions fully revised
-- Questions due today
-- Questions due this week
-- Difficulty breakdown (Easy/Medium/Hard)
+### 🔐 Authentication
+- Email/Password authentication with JWT
+- Google OAuth 2.0 integration
+- Protected routes and sessions
 
-### 🎨 UI/UX
-- Beautiful, modern interface with TailwindCSS
-- Responsive design for all devices
-- Color-coded difficulty badges
-- Visual reminder indicators
+### 📊 Dashboard Analytics
+- Real-time statistics (Due Today, Due Week, Fully Revised)
+- Time-filtered stats (Today/Week/Month/All Time)
+- Activity heatmap with current streak
+- Revision history tracking
+- Question filtering and sorting
+
+### 🎨 Modern UI/UX
+- Glassmorphism design with gradient accents
+- Fully responsive (mobile, tablet, desktop)
+- Hamburger menu for mobile navigation
 - Smooth animations and transitions
+- Dark theme throughout
+- Loading states and skeletons
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **React 18** - UI library
-- **React Router v6** - Client-side routing
+- **React Router v6** - Routing
 - **TailwindCSS** - Styling
-- **Axios** - API calls
+- **Axios** - API client
 - **Context API** - State management
 
 ### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
+- **Node.js & Express** - Server
+- **MongoDB & Mongoose** - Database
 - **JWT** - Authentication
+- **Passport.js** - OAuth
 - **bcryptjs** - Password hashing
-- **node-cron** - Scheduled tasks
-- **Axios** - LeetCode API integration
+
+### Landing Page
+- **Vite + React** - Fast build tool
+- **TailwindCSS** - Styling
+- **LetterGlitch** - Animated background
 
 ## 📁 Project Structure
 
+```
+ProjectX/
+├── backend/          # Express API server (port 5000)
+├── frontend/         # React app (port 3000)
+├── landing/          # Landing page (port 3001)
+└── docs/            # Documentation
+    ├── QUICKSTART.md
+    ├── OAUTH_SETUP_GUIDE.md
+    ├── VERIFICATION_EXPLAINED.md
+    ├── CUSTOM_LISTS_FEATURE.md
+    ├── DEPLOYMENT_GUIDE.md
+    ├── API_EXAMPLES.md
+    ├── ARCHITECTURE.md
+    └── FINAL_CHECKLIST.md
 ```
 ProjectX/
 ├── backend/
@@ -235,31 +257,54 @@ The application uses **node-cron** to check for due reminders daily at 8 AM. The
 5. **Revise**: When a reminder is due, click "Mark as Revised" after reviewing the problem
 6. **Filter & Sort**: Use filters to focus on pending, due soon, or overdue questions
 
-## 🌐 Deployment
+## 🌐 Production Deployment
 
-### Backend Deployment (Render)
+### 🚀 Quick Deploy (30 minutes)
 
-1. Create a new Web Service on [Render](https://render.com)
-2. Connect your GitHub repository
-3. Set the following:
-   - **Build Command**: `cd backend && npm install`
-   - **Start Command**: `cd backend && npm start`
-4. Add environment variables in Render dashboard
-5. Deploy!
+Deploy AlgoTick to production for **FREE** using:
+- **MongoDB Atlas** (Database) - Free tier
+- **Render** (Backend API) - Free tier  
+- **Vercel** (Frontend + Landing) - Free tier
 
-### Frontend Deployment (Vercel)
+**📘 Deployment Guides:**
+- **Quick Start**: See [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - Get live in 30 minutes
+- **Detailed Guide**: See [PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md) - Complete walkthrough
+- **Checklist**: See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) - Pre-deployment tasks
 
-1. Install Vercel CLI: `npm i -g vercel`
-2. Navigate to frontend directory: `cd frontend`
-3. Run: `vercel`
-4. Set environment variable: `REACT_APP_API_URL=your_backend_url`
-5. Deploy!
+### 📋 Deployment Overview
 
-### Database (MongoDB Atlas)
+1. **MongoDB Atlas** - Create free cluster and get connection string
+2. **Google OAuth** - Update with production URLs
+3. **Render** - Deploy backend with environment variables
+4. **Vercel** - Deploy frontend (2 separate projects for app + landing)
+5. **Test** - Verify all features work in production
 
-1. Create a free cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Get your connection string
-3. Update `MONGODB_URI` in your environment variables
+### 🔧 Environment Variables Needed
+
+**Backend (Render):**
+```env
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=...
+SESSION_SECRET=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+FRONTEND_URL=https://your-app.vercel.app
+LANDING_URL=https://your-landing.vercel.app
+```
+
+**Frontend (Vercel):**
+```env
+REACT_APP_API_URL=https://your-backend.onrender.com/api
+REACT_APP_GOOGLE_CLIENT_ID=...
+```
+
+**Landing (Vercel):**
+```env
+VITE_APP_URL=https://your-app.vercel.app
+```
+
+**💡 Tip:** Use `.env.production.template` files in each directory as a reference.
 
 ## 🔒 Security Features
 

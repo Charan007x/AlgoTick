@@ -3,13 +3,19 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
-// Load environment variables
+// Load environment variables FIRST
 dotenv.config();
+
+// Now load passport (which needs env variables)
+const passport = require('./config/passport');
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const questionRoutes = require('./routes/questions');
+const listRoutes = require('./routes/lists');
 
 // Import reminder service
 const { checkReminders } = require('./services/reminderService');
@@ -17,9 +23,28 @@ const { checkReminders } = require('./services/reminderService');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Session configuration (required for Passport)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-tracker', {
@@ -32,6 +57,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
+app.use('/api/lists', listRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
