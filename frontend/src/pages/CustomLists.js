@@ -6,6 +6,7 @@ const CustomLists = () => {
   const [lists, setLists] = useState([]);
   const [selectedList, setSelectedList] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [listDetailsLoading, setListDetailsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAddQuestionForm, setShowAddQuestionForm] = useState(false);
@@ -78,6 +79,7 @@ const CustomLists = () => {
 
   const handleSelectList = async (listId) => {
     try {
+      setListDetailsLoading(true);
       const response = await listsAPI.getList(listId);
       console.log('Selected list response:', response.data.list);
       console.log('Questions count:', response.data.list.questions.length);
@@ -86,6 +88,8 @@ const CustomLists = () => {
       setShowAddQuestionForm(false);
     } catch (error) {
       showMessage('error', 'Failed to load list details');
+    } finally {
+      setListDetailsLoading(false);
     }
   };
 
@@ -260,8 +264,14 @@ const CustomLists = () => {
 
               {/* Lists */}
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#61dca3]"></div>
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-xl animate-pulse">
+                      <div className="h-5 bg-white/10 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-white/10 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-white/10 rounded w-1/4"></div>
+                    </div>
+                  ))}
                 </div>
               ) : lists.length === 0 ? (
                 <p className="text-white/50 text-center py-8">No lists yet. Create one to get started!</p>
@@ -306,7 +316,49 @@ const CustomLists = () => {
 
           {/* List Details */}
           <div className="lg:col-span-2 animate-fadeIn delay-200">
-            {selectedList ? (
+            {listDetailsLoading ? (
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+                <div className="animate-pulse">
+                  {/* Header skeleton */}
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex-1">
+                      <div className="h-8 bg-white/10 rounded w-1/3 mb-2"></div>
+                      <div className="h-4 bg-white/10 rounded w-1/2"></div>
+                    </div>
+                    <div className="h-10 bg-white/10 rounded w-32"></div>
+                  </div>
+                  
+                  {/* Add button skeleton */}
+                  <div className="h-12 bg-white/10 rounded-xl mb-6"></div>
+                  
+                  {/* Questions skeletons */}
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="h-4 bg-white/10 rounded w-12"></div>
+                              <div className="h-4 bg-white/10 rounded w-48"></div>
+                              <div className="h-5 bg-white/10 rounded-full w-16"></div>
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="h-5 bg-white/10 rounded w-16"></div>
+                              <div className="h-5 bg-white/10 rounded w-20"></div>
+                              <div className="h-5 bg-white/10 rounded w-14"></div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="h-9 w-12 bg-white/10 rounded-xl"></div>
+                            <div className="h-9 w-12 bg-white/10 rounded-xl"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : selectedList ? (
               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
                 <div className="flex justify-between items-start mb-6">
                   <div>
