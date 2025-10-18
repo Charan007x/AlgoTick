@@ -1,28 +1,4 @@
 {
-  "version": 2,
-  "name": "algotick-landing",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/assets/(.*)",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "VITE_APP_URL": "@vite_app_url"
-  }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
