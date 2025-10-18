@@ -37,15 +37,29 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
+      console.log('🔑 Login attempt with:', credentials.email);
       const response = await authAPI.login(credentials);
+      console.log('✅ Login response:', response.data);
+      
       const { token: newToken, user: userData } = response.data;
       
+      if (!newToken) {
+        console.error('❌ No token in login response');
+        return {
+          success: false,
+          message: 'No authentication token received',
+        };
+      }
+      
+      console.log('💾 Storing token and user data');
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);
       
+      console.log('✅ Login successful for user:', userData.username);
       return { success: true };
     } catch (error) {
+      console.error('❌ Login error:', error.response?.data || error.message);
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed',
@@ -55,15 +69,29 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
+      console.log('📝 Signup attempt with:', userData.username, userData.email);
       const response = await authAPI.signup(userData);
+      console.log('✅ Signup response:', response.data);
+      
       const { token: newToken, user: newUser } = response.data;
       
+      if (!newToken) {
+        console.error('❌ No token in signup response');
+        return {
+          success: false,
+          message: 'No authentication token received',
+        };
+      }
+      
+      console.log('💾 Storing token and user data');
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(newUser);
       
+      console.log('✅ Signup successful for user:', newUser.username);
       return { success: true };
     } catch (error) {
+      console.error('❌ Signup error:', error.response?.data || error.message);
       return {
         success: false,
         message: error.response?.data?.message || 'Signup failed',

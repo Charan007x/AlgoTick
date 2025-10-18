@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import CustomLists from './pages/CustomLists';
 import Settings from './components/Settings';
 import OAuthCallback from './pages/OAuthCallback';
+import TestAuth from './pages/TestAuth';
 import './index.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
+          <Route path="/test-auth" element={<TestAuth />} />
           <Route
             path="/dashboard"
             element={
