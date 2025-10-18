@@ -17,7 +17,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
     return config;
   },
   (error) => {
@@ -25,15 +24,14 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for logging
+// Add response interceptor for error handling
 api.interceptors.response.use(
-  (response) => {
-    console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, 
-      response.data?.list ? { questionsCount: response.data.list.questions?.length } : 'OK');
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error('API Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.data);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
@@ -53,7 +51,7 @@ export const questionsAPI = {
   updateQuestion: (id, data) => api.put(`/questions/${id}`, data),
   markRevised: (id) => api.put(`/questions/${id}/revise`),
   deleteQuestion: (id) => api.delete(`/questions/${id}`),
-  getDashboardStats: () => api.get('/questions/stats/dashboard'),
+  getDashboardStats: (params) => api.get('/questions/stats/dashboard', { params }),
 };
 
 // Lists API

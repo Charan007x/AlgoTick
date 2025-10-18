@@ -11,25 +11,41 @@ const Dashboard = () => {
   const [questions, setQuestions] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
   const [filter, setFilter] = useState('due-today');
   const [sortBy, setSortBy] = useState('newest');
   const [revisedTimeFilter, setRevisedTimeFilter] = useState('today');
 
+  // Fetch stats only once or when revisedTimeFilter changes
+  const fetchStats = async () => {
+    try {
+      const statsRes = await questionsAPI.getDashboardStats({ revisedTimeFilter });
+      setStats(statsRes.data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  };
+
+  // Fetch questions separately
+  const fetchQuestions = async () => {
+    try {
+      setQuestionsLoading(true);
+      const questionsRes = await questionsAPI.getQuestions({ 
+        filter: filter !== 'all' ? filter : undefined,
+        sortBy: sortBy !== 'newest' ? sortBy : undefined
+      });
+      setQuestions(questionsRes.data.questions);
+    } catch (error) {
+      console.error('Failed to fetch questions:', error);
+    } finally {
+      setQuestionsLoading(false);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [questionsRes, statsRes] = await Promise.all([
-        questionsAPI.getQuestions({ 
-          filter: filter !== 'all' ? filter : undefined,
-          sortBy: sortBy !== 'newest' ? sortBy : undefined
-        }),
-        questionsAPI.getDashboardStats({ revisedTimeFilter }),
-      ]);
-      
-      setQuestions(questionsRes.data.questions);
-      setStats(statsRes.data);
-      console.log('📊 Dashboard stats:', statsRes.data);
-      console.log('🔥 Heatmap data:', statsRes.data.heatmapData);
+      await Promise.all([fetchStats(), fetchQuestions()]);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -37,10 +53,27 @@ const Dashboard = () => {
     }
   };
 
+  // Initial load
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, sortBy, revisedTimeFilter]);
+  }, []);
+
+  // Refetch questions when filter/sort changes
+  useEffect(() => {
+    if (!loading) {
+      fetchQuestions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, sortBy]);
+
+  // Refetch stats when revisedTimeFilter changes
+  useEffect(() => {
+    if (!loading) {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revisedTimeFilter]);
 
   const handleQuestionAdded = () => {
     fetchData();
@@ -57,56 +90,63 @@ const Dashboard = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Stats Section */}
-        {stats && (
+        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="animate-fadeIn delay-100">
-              <StatsCard
-                title="Due Today"
-                value={stats.dueToday}
-                icon={ICONS.CLOCK}
-                color="yellow"
-              />
-            </div>
-            <div className="animate-fadeIn delay-200">
-              <StatsCard
-                title="Due This Week"
-                value={stats.dueThisWeek}
-                icon={ICONS.CALENDAR}
-                color="red"
-              />
-            </div>
-            <div className="animate-fadeIn delay-300">
-              <StatsCard
-                title="Fully Revised"
-                value={stats.totalRevised}
-                icon={ICONS.CHECKMARK}
-                color="green"
-                showTimeFilter={true}
-                timeFilter={revisedTimeFilter}
-                onTimeFilterChange={setRevisedTimeFilter}
-              />
-            </div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 h-32 animate-pulse">
+                <div className="h-4 bg-white/10 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-white/10 rounded w-1/3"></div>
+              </div>
+            ))}
           </div>
-        )}
+        ) : stats ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <StatsCard
+              title="Due Today"
+              value={stats.dueToday}
+              icon={ICONS.CLOCK}
+              color="yellow"
+            />
+            <StatsCard
+              title="Due This Week"
+              value={stats.dueThisWeek}
+              icon={ICONS.CALENDAR}
+              color="red"
+            />
+            <StatsCard
+              title="Fully Revised"
+              value={stats.totalRevised}
+              icon={ICONS.CHECKMARK}
+              color="green"
+              showTimeFilter={true}
+              timeFilter={revisedTimeFilter}
+              onTimeFilterChange={setRevisedTimeFilter}
+            />
+          </div>
+        ) : null}
 
         {/* Activity Heatmap */}
-        {stats && stats.heatmapData && (
-          <div className="animate-fadeIn delay-400">
+        {loading ? (
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 mb-8 h-64 animate-pulse">
+            <div className="h-6 bg-white/10 rounded w-1/4 mb-4"></div>
+            <div className="h-40 bg-white/10 rounded"></div>
+          </div>
+        ) : stats && stats.heatmapData ? (
+          <div className="mb-8">
             <ActivityHeatMap 
               key={`heatmap-${stats.heatmapData.length}-${stats.totalRevised}`}
               heatmapData={stats.heatmapData} 
             />
           </div>
-        )}
+        ) : null}
 
         {/* Add Question Form */}
-        <div className="mb-8 animate-fadeIn delay-500">
+        <div className="mb-8">
           <AddQuestionForm onQuestionAdded={handleQuestionAdded} />
         </div>
 
         {/* Questions List */}
-                {/* Question List Section */}
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 animate-fadeIn delay-600">
+        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <h2 className="text-2xl font-bold text-white">My Questions</h2>
             
@@ -152,10 +192,15 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12 animate-fadeIn">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#61dca3] shadow-lg shadow-[#61dca3]/30"></div>
-              <p className="mt-4 text-white/60 animate-pulse">Loading questions...</p>
+          {loading || questionsLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 h-32 animate-pulse">
+                  <div className="h-4 bg-white/10 rounded w-3/4 mb-3"></div>
+                  <div className="h-3 bg-white/10 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-white/10 rounded w-1/3"></div>
+                </div>
+              ))}
             </div>
           ) : (
             <QuestionList 
