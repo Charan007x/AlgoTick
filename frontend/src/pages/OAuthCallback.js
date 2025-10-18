@@ -15,24 +15,31 @@ const OAuthCallback = () => {
 
       if (error) {
         // OAuth failed, redirect to login with error
-        navigate('/login?error=OAuth authentication failed. Please try again.');
+        console.error('OAuth error:', error);
+        navigate('/login?error=oauth_failed');
         return;
       }
 
       if (token) {
-        // Store the token
-        localStorage.setItem('token', token);
-        
-        // Update auth context
-        if (setToken) {
+        try {
+          // Store the token
+          localStorage.setItem('token', token);
+          
+          // Update auth context - this will trigger the auth check in AuthContext
           setToken(token);
-        }
 
-        // Redirect to dashboard
-        navigate('/dashboard');
+          // Small delay to let the auth check complete
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 500);
+        } catch (err) {
+          console.error('Token processing error:', err);
+          navigate('/login?error=auth_failed');
+        }
       } else {
         // No token found, redirect to login
-        navigate('/login?error=Authentication failed. Please try again.');
+        console.error('No token in callback');
+        navigate('/login?error=no_token');
       }
     };
 
