@@ -34,12 +34,23 @@ async function syncWebsiteToExtension() {
         chrome.storage.local.get(['token'], async (result) => {
           if (result.token !== token) {
             // Save to extension storage
-            chrome.storage.local.set({ token, user }, () => {
-              console.log('✅ Auth synced from website to extension');
-              console.log('   User:', user.email);
-            });
+            await chrome.storage.local.set({ token, user });
+            console.log('✅ Auth synced from website to extension');
+            console.log('   User:', user.email);
+            
+            // Notify extension popup to update UI
+            try {
+              chrome.runtime.sendMessage({ action: 'authUpdated', token, user });
+            } catch (e) {
+              // Extension might be reloading, ignore
+            }
           }
         });
+      } else {
+        // Invalid token, clear both
+        console.log('⚠️ Invalid token detected, clearing...');
+        localStorage.removeItem('token');
+        chrome.storage.local.remove(['token', 'user']);
       }
     } catch (e) {
       console.error('Error syncing auth:', e);

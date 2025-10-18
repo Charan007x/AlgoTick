@@ -402,6 +402,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })();
     return true; // Keep message channel open for async response
   }
+
+  if (request.action === 'authUpdated') {
+    // Auth was updated from website, refresh the popup UI
+    console.log('🔄 Auth updated from website, refreshing UI...');
+    checkAuth();
+    return false;
+  }
   
   return false;
 });

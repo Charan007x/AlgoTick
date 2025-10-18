@@ -106,25 +106,41 @@ function injectAddButton() {
       return new Promise((resolve, reject) => {
         const attemptSend = (attemptsLeft) => {
           try {
+            // Check if extension context is valid
+            if (!chrome.runtime?.id) {
+              reject(new Error('Extension reloaded. Please refresh the page.'));
+              return;
+            }
+
             chrome.runtime.sendMessage(message, (response) => {
               if (chrome.runtime.lastError) {
-                console.log(`Attempt failed, retries left: ${attemptsLeft - 1}`);
+                const error = chrome.runtime.lastError.message;
+                console.log(`Message failed: ${error}, retries left: ${attemptsLeft - 1}`);
+                
+                // Check if it's a context invalidation error
+                if (error.includes('Extension context invalidated') || 
+                    error.includes('message port closed') ||
+                    error.includes('Receiving end does not exist')) {
+                  reject(new Error('Extension reloaded. Please refresh this page.'));
+                  return;
+                }
                 
                 if (attemptsLeft > 1) {
                   // Wait a bit and retry
-                  setTimeout(() => attemptSend(attemptsLeft - 1), 100);
+                  setTimeout(() => attemptSend(attemptsLeft - 1), 200);
                 } else {
-                  reject(new Error('Extension context invalidated. Please reload the page.'));
+                  reject(new Error('Could not connect to extension. Try reloading the page.'));
                 }
               } else {
                 resolve(response);
               }
             });
           } catch (error) {
+            console.error('Send message error:', error);
             if (attemptsLeft > 1) {
-              setTimeout(() => attemptSend(attemptsLeft - 1), 100);
+              setTimeout(() => attemptSend(attemptsLeft - 1), 200);
             } else {
-              reject(error);
+              reject(new Error('Extension error. Please reload the page.'));
             }
           }
         };
