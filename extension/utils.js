@@ -1,7 +1,8 @@
 // Shared utilities for extension
 // Used by both popup.js and background.js
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://algotick.onrender.com/api';
+const FRONTEND_URL = 'https://algotick.vercel.app';
 
 // Storage helpers
 const storage = {

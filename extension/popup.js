@@ -1,9 +1,10 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://algotick.onrender.com/api';
+const FRONTEND_URL = 'https://algotick.vercel.app';
 
 // Sync auth to website
 function syncToWebsite(token, user) {
-  // Find all localhost:3000 tabs and sync auth
-  chrome.tabs.query({ url: 'http://localhost:3000/*' }, (tabs) => {
+  // Find all frontend tabs and sync auth
+  chrome.tabs.query({ url: `${FRONTEND_URL}/*` }, (tabs) => {
     tabs.forEach(tab => {
       chrome.tabs.sendMessage(
         tab.id,
@@ -154,7 +155,7 @@ async function logout() {
   await clearStorage();
   
   // Clear website auth if open
-  chrome.tabs.query({ url: 'http://localhost:3000/*' }, (tabs) => {
+  chrome.tabs.query({ url: `${FRONTEND_URL}/*` }, (tabs) => {
     tabs.forEach(tab => {
       chrome.tabs.sendMessage(tab.id, { action: 'clearAuth' });
     });
@@ -366,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Open full dashboard
   document.getElementById('openDashboardBtn').addEventListener('click', () => {
-    chrome.tabs.create({ url: 'http://localhost:3000/dashboard' });
+    chrome.tabs.create({ url: `${FRONTEND_URL}/dashboard` });
   });
   
   // Enter key support

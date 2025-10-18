@@ -28,7 +28,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   chrome.storage.local.get(['apiUrl'], (result) => {
     if (!result.apiUrl) {
       chrome.storage.local.set({
-        apiUrl: 'http://localhost:5000/api',
+        apiUrl: 'https://algotick.onrender.com/api',
         notifications: true
       });
       console.log('✅ Default settings configured');
@@ -40,7 +40,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     
     // Open welcome page
     chrome.tabs.create({
-      url: 'http://localhost:3000'
+      url: 'https://algotick.vercel.app'
     });
   } else if (details.reason === 'update') {
     console.log('LeetCode Tracker Extension updated!');

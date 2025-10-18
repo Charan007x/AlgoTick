@@ -18,7 +18,7 @@ function loadSettings() {
     if (result.apiUrl) {
       document.getElementById('apiUrl').value = result.apiUrl;
     } else {
-      document.getElementById('apiUrl').value = 'http://localhost:5000/api';
+      document.getElementById('apiUrl').value = 'https://algotick.onrender.com/api';
     }
     
     // Notifications
@@ -84,7 +84,7 @@ function clearAllData() {
       showMessage('All data cleared. Please close and reopen the extension.', 'success');
       
       // Reset form to defaults
-      document.getElementById('apiUrl').value = 'http://localhost:5000/api';
+      document.getElementById('apiUrl').value = 'https://algotick.onrender.com/api';
       document.getElementById('notifications').checked = true;
       document.getElementById('autoDetect').checked = true;
       

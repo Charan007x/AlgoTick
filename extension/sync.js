@@ -1,10 +1,10 @@
-// Sync script for localhost:3000 - syncs auth between website and extension
-console.log('🔄 Auth sync script loaded on localhost:3000');
+// Sync script for production - syncs auth between website and extension
+console.log('🔄 Auth sync script loaded on algotick.vercel.app');
 
 // Function to get user info from backend using token
 async function getUserFromToken(token) {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/me', {
+    const response = await fetch('https://algotick.onrender.com/api/auth/me', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
