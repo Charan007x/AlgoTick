@@ -3,22 +3,10 @@
  * Using Unicode code points to ensure cross-platform compatibility
  */
 
-// Custom SVG Calendar Component
-export const CalendarIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="6" y="10" width="36" height="32" rx="4" fill="currentColor" opacity="0.2"/>
-    <rect x="6" y="10" width="36" height="8" rx="4" fill="currentColor" opacity="0.3"/>
-    <line x1="16" y1="6" x2="16" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <line x1="32" y1="6" x2="32" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <text x="24" y="26" fontSize="8" fontWeight="600" fill="currentColor" textAnchor="middle">APR</text>
-    <text x="24" y="36" fontSize="12" fontWeight="bold" fill="currentColor" textAnchor="middle">9</text>
-  </svg>
-);
-
 export const ICONS = {
   // Dashboard Stats Icons
   CLOCK: '\u23F0',           // ⏰ - Due Today
-  CALENDAR: <CalendarIcon />, // Custom SVG - Due This Week
+  CALENDAR: '\u{1F4C5}',     // 📅 - Due This Week
   CHECKMARK: '\u2705',       // ✅ - Fully Revised
   
   // Common UI Icons
