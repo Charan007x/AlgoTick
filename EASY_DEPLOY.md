@@ -70,6 +70,7 @@ LANDING_URL = https://algotick-landing.vercel.app
 5. Click **"Environment Variables"** and add:
    ```
    REACT_APP_API_URL = https://your-render-backend-url.onrender.com/api
+   REACT_APP_LANDING_URL = https://algotick-landing.vercel.app
    REACT_APP_GOOGLE_CLIENT_ID = your-google-client-id
    ```
 6. Click **"Deploy"**

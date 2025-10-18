@@ -10,7 +10,7 @@ const Settings = () => {
   const [leetcodeStats, setLeetcodeStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
   // Fetch current username on component mount
   useEffect(() => {

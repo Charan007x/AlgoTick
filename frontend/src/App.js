@@ -12,8 +12,9 @@ import './index.css';
 
 // Redirect to landing page
 const RedirectToLanding = () => {
+  const LANDING_URL = process.env.REACT_APP_LANDING_URL || 'http://localhost:3001';
   React.useEffect(() => {
-    window.location.href = 'http://localhost:3001';
+    window.location.href = LANDING_URL;
   }, []);
   return null;
 };
