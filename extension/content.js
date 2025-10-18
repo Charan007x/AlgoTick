@@ -176,9 +176,9 @@ function injectAddButton() {
         button.textContent = '+ Add to Tracker';
         
         // If not authenticated, suggest login
-        if (errorMsg.includes('authenticated') || errorMsg.includes('login')) {
+        if (errorMsg.includes('authenticated') || errorMsg.includes('login') || errorMsg.includes('Please login')) {
           setTimeout(() => {
-            showNotification('Click extension icon to login', 'error');
+            showNotification('👆 Click extension icon to login', 'error');
           }, 2000);
         }
       }

@@ -39,6 +39,13 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     const token = await storage.get('token');
     const apiUrl = await storage.get('apiUrl') || API_URL;
     
+    // Check if we need authentication for this endpoint
+    const requiresAuth = !endpoint.includes('/auth/login') && !endpoint.includes('/auth/signup');
+    
+    if (requiresAuth && !token) {
+      throw new Error('Please login first. Click the extension icon to login.');
+    }
+    
     const options = {
       method,
       headers: {
