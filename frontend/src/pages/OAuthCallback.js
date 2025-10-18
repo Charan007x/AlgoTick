@@ -1,45 +1,63 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { setToken } = useAuth();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const processCallback = async () => {
-      const params = new URLSearchParams(location.search);
-      const token = params.get('token');
-      const error = params.get('error');
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        const errorParam = params.get('error');
 
-      if (error) {
-        // OAuth failed, redirect to login with error
-        console.error('OAuth error:', error);
-        navigate('/login?error=oauth_failed');
-        return;
-      }
+        console.log('OAuth Callback - Token:', token ? 'Received' : 'Missing');
+        console.log('OAuth Callback - Error:', errorParam);
 
-      if (token) {
-        try {
-          // Store the token
-          localStorage.setItem('token', token);
-          
-          // Update auth context - this will trigger the auth check in AuthContext
-          setToken(token);
-
-          // Small delay to let the auth check complete
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 500);
-        } catch (err) {
-          console.error('Token processing error:', err);
-          navigate('/login?error=auth_failed');
+        if (errorParam) {
+          console.error('OAuth error from backend:', errorParam);
+          setError('OAuth authentication failed');
+          setTimeout(() => navigate('/login?error=oauth_failed'), 2000);
+          return;
         }
-      } else {
-        // No token found, redirect to login
-        console.error('No token in callback');
-        navigate('/login?error=no_token');
+
+        if (!token) {
+          console.error('No token in OAuth callback');
+          setError('No authentication token received');
+          setTimeout(() => navigate('/login?error=no_token'), 2000);
+          return;
+        }
+
+        // Store the token
+        localStorage.setItem('token', token);
+        console.log('Token stored in localStorage');
+
+        // Verify token works by fetching user data
+        try {
+          const response = await authAPI.getCurrentUser();
+          console.log('User data fetched:', response.data.user);
+          
+          // Update auth context
+          setToken(token);
+          
+          // Navigate to dashboard
+          console.log('Redirecting to dashboard...');
+          navigate('/dashboard', { replace: true });
+        } catch (verifyError) {
+          console.error('Token verification failed:', verifyError);
+          localStorage.removeItem('token');
+          setError('Authentication verification failed');
+          setTimeout(() => navigate('/login?error=verify_failed'), 2000);
+        }
+      } catch (err) {
+        console.error('OAuth callback error:', err);
+        setError('Authentication processing error');
+        setTimeout(() => navigate('/login?error=processing_failed'), 2000);
       }
     };
 
@@ -49,10 +67,21 @@ const OAuthCallback = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="text-center">
-        <div className="inline-block">
-          <div className="w-16 h-16 border-4 border-[#61dca3] border-t-transparent rounded-full animate-spin"></div>
-        </div>
-        <p className="mt-4 text-white text-lg">Completing authentication...</p>
+        {error ? (
+          <>
+            <div className="text-red-500 text-xl mb-4">❌</div>
+            <p className="text-red-400 text-lg">{error}</p>
+            <p className="text-white/60 text-sm mt-2">Redirecting to login...</p>
+          </>
+        ) : (
+          <>
+            <div className="inline-block">
+              <div className="w-16 h-16 border-4 border-[#61dca3] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="mt-4 text-white text-lg">Completing authentication...</p>
+            <p className="mt-2 text-white/60 text-sm">Please wait while we verify your account</p>
+          </>
+        )}
       </div>
     </div>
   );

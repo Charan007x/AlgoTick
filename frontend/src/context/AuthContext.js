@@ -10,15 +10,24 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (token) {
+      const currentToken = localStorage.getItem('token');
+      console.log('AuthContext - Checking auth, token exists:', !!currentToken);
+      
+      if (currentToken) {
         try {
+          console.log('AuthContext - Fetching user data...');
           const response = await authAPI.getCurrentUser();
+          console.log('AuthContext - User authenticated:', response.data.user.username);
           setUser(response.data.user);
+          setToken(currentToken);
         } catch (error) {
-          console.error('Auth check failed:', error);
+          console.error('AuthContext - Auth check failed:', error.response?.status, error.response?.data);
           localStorage.removeItem('token');
           setToken(null);
+          setUser(null);
         }
+      } else {
+        console.log('AuthContext - No token found');
       }
       setLoading(false);
     };
