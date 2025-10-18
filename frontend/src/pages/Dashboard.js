@@ -28,6 +28,8 @@ const Dashboard = () => {
       
       setQuestions(questionsRes.data.questions);
       setStats(statsRes.data);
+      console.log('📊 Dashboard stats:', statsRes.data);
+      console.log('🔥 Heatmap data:', statsRes.data.heatmapData);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {

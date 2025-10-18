@@ -1,6 +1,8 @@
 import React from 'react';
 
 const ActivityHeatMap = ({ heatmapData }) => {
+  console.log('🔥 ActivityHeatMap received data:', heatmapData);
+  
   if (!heatmapData || heatmapData.length === 0) {
     return (
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 mb-8">
