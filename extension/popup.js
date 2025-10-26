@@ -327,6 +327,18 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage('Please fill in all fields', 'error');
       return;
     }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showMessage('Please enter a valid email address', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage('Password must be at least 6 characters', 'error');
+      return;
+    }
     
     try {
       await signup(username, email, password);
