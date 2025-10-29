@@ -16,18 +16,13 @@ const OAuthCallback = () => {
         const token = params.get('token');
         const errorParam = params.get('error');
 
-        console.log('OAuth Callback - Token:', token ? 'Received' : 'Missing');
-        console.log('OAuth Callback - Error:', errorParam);
-
         if (errorParam) {
-          console.error('OAuth error from backend:', errorParam);
           setError('OAuth authentication failed');
           setTimeout(() => navigate('/login?error=oauth_failed'), 2000);
           return;
         }
 
         if (!token) {
-          console.error('No token in OAuth callback');
           setError('No authentication token received');
           setTimeout(() => navigate('/login?error=no_token'), 2000);
           return;
@@ -35,18 +30,15 @@ const OAuthCallback = () => {
 
         // Store the token
         localStorage.setItem('token', token);
-        console.log('Token stored in localStorage');
 
         // Verify token works by fetching user data
         try {
           const response = await authAPI.getCurrentUser();
-          console.log('User data fetched:', response.data.user);
           
           // Update auth context
           setToken(token);
           
           // Navigate to dashboard
-          console.log('Redirecting to dashboard...');
           navigate('/dashboard', { replace: true });
         } catch (verifyError) {
           console.error('Token verification failed:', verifyError);

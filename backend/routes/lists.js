@@ -171,27 +171,7 @@ router.post('/:id/add-question', async (req, res) => {
       tags: leetcodeData.tags
     });
     
-    console.log('\n=== BEFORE SAVE ===');
-    console.log('Questions count:', list.questions.length);
-    console.log('Questions:', JSON.stringify(list.questions.map(q => ({ 
-      _id: q._id, 
-      questionNumber: q.questionNumber, 
-      title: q.title 
-    })), null, 2));
-    
     await list.save();
-    
-    console.log('\n=== AFTER SAVE ===');
-    console.log('Questions count:', list.questions.length);
-    console.log('Questions:', JSON.stringify(list.questions.map(q => ({ 
-      _id: q._id, 
-      questionNumber: q.questionNumber, 
-      title: q.title 
-    })), null, 2));
-    
-    console.log('\n=== RESPONSE BEING SENT ===');
-    console.log('List ID:', list._id);
-    console.log('Questions in response:', list.questions.length);
     
     res.status(201).json({
       message: 'Question added to list',

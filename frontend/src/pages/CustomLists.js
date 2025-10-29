@@ -81,9 +81,6 @@ const CustomLists = () => {
     try {
       setListDetailsLoading(true);
       const response = await listsAPI.getList(listId);
-      console.log('Selected list response:', response.data.list);
-      console.log('Questions count:', response.data.list.questions.length);
-      console.log('Questions:', response.data.list.questions);
       setSelectedList(response.data.list);
       setShowAddQuestionForm(false);
     } catch (error) {
@@ -102,25 +99,14 @@ const CustomLists = () => {
     }
 
     if (submitting) {
-      console.log('Already submitting, ignoring duplicate request');
       return;
     }
 
     try {
       setSubmitting(true);
-      console.log('Adding question:', questionInput, 'to list:', selectedList._id);
       const response = await listsAPI.addQuestionToList(selectedList._id, {
         url: questionInput
       });
-      console.log('=== ADD QUESTION RESPONSE ===');
-      console.log('Response list:', response.data.list);
-      console.log('Questions array length:', response.data.list.questions.length);
-      console.log('Questions:', response.data.list.questions.map(q => ({ 
-        _id: q._id, 
-        num: q.questionNumber, 
-        title: q.title 
-      })));
-      console.log('===========================');
       
       setSelectedList(response.data.list);
       

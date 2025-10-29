@@ -10,6 +10,7 @@ import CustomLists from './pages/CustomLists';
 import Settings from './components/Settings';
 import OAuthCallback from './pages/OAuthCallback';
 import TestAuth from './pages/TestAuth';
+import Labs from './labs/Labs';
 import './index.css';
 
 function App() {
@@ -43,6 +44,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Settings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/labs"
+            element={
+              <PrivateRoute>
+                <Labs />
               </PrivateRoute>
             }
           />
