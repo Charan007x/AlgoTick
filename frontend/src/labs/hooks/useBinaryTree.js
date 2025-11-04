@@ -154,6 +154,43 @@ export function useBinaryTree() {
     }
   }
 
+  const levelOrderTraversal = async () => {
+    if (isAnimating || !tree) return
+    setIsAnimating(true)
+    setHighlightedNodes([])
+    setTraversalHistory([])
+
+    const queue = [tree]
+    const history = []
+
+    try {
+      while (queue.length > 0) {
+        const node = queue.shift()
+        
+        // Highlight current node
+        setHighlightedNodes([node.id])
+        history.push(node.value)
+        setTraversalHistory([...history])
+        
+        // Wait for animation
+        await new Promise(resolve => setTimeout(resolve, 800))
+        
+        // Add children to queue
+        if (node.left) queue.push(node.left)
+        if (node.right) queue.push(node.right)
+      }
+      
+      // Clear highlights after completion
+      setTimeout(() => {
+        setHighlightedNodes([])
+      }, 1000)
+    } finally {
+      setTimeout(() => {
+        setIsAnimating(false)
+      }, 500)
+    }
+  }
+
   return {
     tree,
     setTree,
@@ -165,5 +202,6 @@ export function useBinaryTree() {
     inorderTraversal,
     preorderTraversal,
     postorderTraversal,
+    levelOrderTraversal,
   }
 }

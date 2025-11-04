@@ -8,20 +8,20 @@ export function useHeap() {
   const [heapType, setHeapType] = useState('max')
   const [highlightedNodes, setHighlightedNodes] = useState([])
 
-  const shouldSwap = (parent, child) => {
-    if (heapType === 'max') {
+  const shouldSwap = (parent, child, type) => {
+    if (type === 'max') {
       return parent < child
     }
     return parent > child
   }
 
-  const heapifyUp = (array, index) => {
+  const heapifyUp = (array, index, type) => {
     const parentIndex = Math.floor((index - 1) / 2)
     
-    if (parentIndex >= 0 && shouldSwap(array[parentIndex], array[index])) {
+    if (parentIndex >= 0 && shouldSwap(array[parentIndex], array[index], type)) {
       // Swap
       [array[parentIndex], array[index]] = [array[index], array[parentIndex]]
-      heapifyUp(array, parentIndex)
+      heapifyUp(array, parentIndex, type)
     }
   }
 
@@ -40,7 +40,7 @@ export function useHeap() {
     if (isNaN(value)) return
 
     const newArray = [...heapArray, value]
-    heapifyUp(newArray, newArray.length - 1)
+    heapifyUp(newArray, newArray.length - 1, heapType)
     
     setHeapArray(newArray)
     nodeIdCounter = 0
@@ -53,7 +53,7 @@ export function useHeap() {
     values.forEach(value => {
       if (!isNaN(value)) {
         newArray.push(value)
-        heapifyUp(newArray, newArray.length - 1)
+        heapifyUp(newArray, newArray.length - 1, heapType)
       }
     })
     
@@ -87,7 +87,7 @@ export function useHeap() {
         values.forEach(value => {
           if (!isNaN(value)) {
             newArray.push(value)
-            heapifyUp(newArray, newArray.length - 1)
+            heapifyUp(newArray, newArray.length - 1, newType)
           }
         })
         setHeapArray(newArray)
