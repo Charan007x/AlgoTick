@@ -1,37 +1,90 @@
 const cron = require('node-cron');
 const aiCoachService = require('../ai-services/aiCoachService');
 const AICoachCache = require('../models/AICoachCache');
-
-// Mock models - Replace with actual imports when available
-// const User = require('../models/User');
-// const AIProfile = require('../models/AIProfile');
-// const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+const AIProfile = require('../models/AIProfile');
+const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 
 /**
- * Fetch AI profile for a user
- * TODO: Replace with actual database query
+ * Fetch AI profile for a user - same logic as routes
  */
 async function getAIProfile(userId) {
-  // Mock data for now
-  return {
-    userId,
-    profile: {
-      totalProblems: 20,
-      currentStreak: 1,
-      lastSolved: new Date(),
-      strongTopics: ['Sliding Window', 'Array', 'Hash Table'],
-      weakTopics: ['Linked List', 'Enumeration', 'Simulation']
+  try {
+    let aiProfile = await AIProfile.findOne({ userId });
+    
+    if (aiProfile) {
+      return aiProfile;
     }
-  };
+    
+    const leetcodeData = await LeetCodeSubmission.findOne({ userId });
+    
+    if (!leetcodeData || !leetcodeData.submissions || leetcodeData.submissions.length === 0) {
+      return {
+        userId,
+        profile: {
+          totalProblems: 0,
+          currentStreak: 0,
+          lastSolved: null,
+          strongTopics: ['Array', 'String'],
+          weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
+        }
+      };
+    }
+    
+    const recentSubmissions = leetcodeData.submissions.slice(0, 20);
+    const topicCount = {};
+    
+    recentSubmissions.forEach(sub => {
+      if (sub.topics && sub.topics.length > 0) {
+        sub.topics.forEach(topic => {
+          topicCount[topic] = (topicCount[topic] || 0) + 1;
+        });
+      }
+    });
+    
+    const sortedTopics = Object.entries(topicCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([topic]) => topic);
+    
+    const strongCount = Math.max(3, Math.ceil(sortedTopics.length * 0.4));
+    const strongTopics = sortedTopics.slice(0, strongCount);
+    
+    const weakCount = Math.max(3, Math.ceil(sortedTopics.length * 0.4));
+    const weakTopics = sortedTopics.slice(-weakCount);
+    
+    aiProfile = await AIProfile.create({
+      userId,
+      profile: {
+        totalProblems: recentSubmissions.length,
+        currentStreak: 1,
+        lastSolved: recentSubmissions[0]?.timestamp || new Date(),
+        strongTopics: strongTopics.length > 0 ? strongTopics : ['Array', 'String'],
+        weakTopics: weakTopics.length > 0 ? weakTopics : ['Dynamic Programming', 'Graph', 'Tree']
+      }
+    });
+    
+    return aiProfile;
+  } catch (error) {
+    console.error('[Cron] Error in getAIProfile:', error);
+    return null;
+  }
 }
 
 /**
  * Fetch LeetCode submissions for a user
- * TODO: Replace with actual database query
  */
 async function getLeetCodeSubmissions(userId) {
-  // Mock data for now
-  return [];
+  try {
+    const leetcodeData = await LeetCodeSubmission.findOne({ userId });
+    
+    if (!leetcodeData || !leetcodeData.submissions) {
+      return [];
+    }
+    
+    return leetcodeData.submissions.slice(0, 20);
+  } catch (error) {
+    console.error('[Cron] Error in getLeetCodeSubmissions:', error);
+    return [];
+  }
 }
 
 /**

@@ -3,10 +3,8 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const aiCoachService = require('../ai-services/aiCoachService');
 const AICoachCache = require('../models/AICoachCache');
-
-// Mock models - Replace with actual imports when available
-// const AIProfile = require('../models/AIProfile');
-// const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+const AIProfile = require('../models/AIProfile');
+const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 
 /**
  * @route   GET /api/ai-coach/dashboard
@@ -333,34 +331,111 @@ router.get('/performance', authMiddleware, async (req, res) => {
 });
 
 // ============ HELPER FUNCTIONS ============
-// TODO: Replace these with actual database queries
 
 async function getAIProfile(userId) {
-  // This should query your AIProfile model
-  // Example: return await AIProfile.findOne({ userId });
-  
-  // Temporary mock data for development
-  return {
-    userId,
-    profile: {
-      totalProblems: 20,
-      currentStreak: 1,
-      lastSolved: new Date(),
-      strongTopics: ['Sliding Window', 'Array', 'Hash Table'],
-      weakTopics: ['Linked List', 'Enumeration', 'Simulation']
+  try {
+    // Try to get existing AI profile
+    let aiProfile = await AIProfile.findOne({ userId });
+    
+    if (aiProfile) {
+      return aiProfile;
     }
-  };
+    
+    // If no profile exists, analyze submissions and create one
+    const leetcodeData = await LeetCodeSubmission.findOne({ userId });
+    
+    if (!leetcodeData || !leetcodeData.submissions || leetcodeData.submissions.length === 0) {
+      // Return default profile for new users
+      return {
+        userId,
+        profile: {
+          totalProblems: 0,
+          currentStreak: 0,
+          lastSolved: null,
+          strongTopics: ['Array', 'String'],
+          weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
+        }
+      };
+    }
+    
+    // Analyze last 20 submissions to determine strong/weak topics
+    const recentSubmissions = leetcodeData.submissions.slice(0, 20);
+    const topicCount = {};
+    
+    recentSubmissions.forEach(sub => {
+      if (sub.topics && sub.topics.length > 0) {
+        sub.topics.forEach(topic => {
+          topicCount[topic] = (topicCount[topic] || 0) + 1;
+        });
+      }
+    });
+    
+    // Sort topics by frequency
+    const sortedTopics = Object.entries(topicCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([topic]) => topic);
+    
+    // Strong topics: top 40%
+    const strongCount = Math.max(3, Math.ceil(sortedTopics.length * 0.4));
+    const strongTopics = sortedTopics.slice(0, strongCount);
+    
+    // Weak topics: bottom 40%
+    const weakCount = Math.max(3, Math.ceil(sortedTopics.length * 0.4));
+    const weakTopics = sortedTopics.slice(-weakCount);
+    
+    // Create and save new AI profile
+    aiProfile = await AIProfile.create({
+      userId,
+      profile: {
+        totalProblems: recentSubmissions.length,
+        currentStreak: 1,
+        lastSolved: recentSubmissions[0]?.timestamp || new Date(),
+        strongTopics: strongTopics.length > 0 ? strongTopics : ['Array', 'String'],
+        weakTopics: weakTopics.length > 0 ? weakTopics : ['Dynamic Programming', 'Graph', 'Tree']
+      }
+    });
+    
+    return aiProfile;
+  } catch (error) {
+    console.error('Error in getAIProfile:', error);
+    // Return default profile on error
+    return {
+      userId,
+      profile: {
+        totalProblems: 0,
+        currentStreak: 0,
+        lastSolved: null,
+        strongTopics: ['Array', 'String'],
+        weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
+      }
+    };
+  }
 }
 
 async function getLeetCodeSubmissions(userId) {
-  // This should query your LeetCodeSubmission model
-  // Example: return await LeetCodeSubmission.findOne({ userId });
-  
-  // Temporary mock data for development
-  return {
-    userId,
-    submissions: []
-  };
+  try {
+    const leetcodeData = await LeetCodeSubmission.findOne({ userId });
+    
+    if (!leetcodeData || !leetcodeData.submissions) {
+      return {
+        userId,
+        submissions: []
+      };
+    }
+    
+    // Return last 20 submissions
+    return {
+      userId,
+      submissions: leetcodeData.submissions.slice(0, 20)
+    };
+  } catch (error) {
+    console.error('Error in getLeetCodeSubmissions:', error);
+    return {
+      userId,
+      submissions: []
+    };
+  }
 }
 
 module.exports = router;
+
