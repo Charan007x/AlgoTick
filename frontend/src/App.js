@@ -24,7 +24,14 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/test-auth" element={<TestAuth />} />
-          <Route path="/test-dashboard" element={<TestDashboard />} />
+          <Route
+            path="/test-dashboard"
+            element={
+              <PrivateRoute>
+                <TestDashboard />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
