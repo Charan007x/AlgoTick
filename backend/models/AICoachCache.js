@@ -24,7 +24,7 @@ const aiCoachCacheSchema = new mongoose.Schema({
   weakTopics: [String],
   cooldownHours: {
     type: Number,
-    default: 6 // Set to 6 for production
+    default: 0
   }
 }, { timestamps: true });
 
