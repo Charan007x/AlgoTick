@@ -3,7 +3,6 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const aiCoachService = require('../ai-services/aiCoachService');
 const AICoachCache = require('../models/AICoachCache');
-const Question = require('../models/Question');
 
 // Mock models - Replace with actual imports when available
 // const AIProfile = require('../models/AIProfile');
@@ -62,7 +61,11 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
     console.log('📝 AI Profile:', aiProfile);
 
-    // Generate recommendations (even for users with no questions)
+    if (!aiProfile) {
+      return res.status(404).json({ message: 'AI profile not found' });
+    }
+
+    // Generate recommendations
     console.log('🤖 Calling AI Coach service...');
     const recommendations = await aiCoachService.getRecommendations(
       aiProfile,
@@ -87,7 +90,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         weakTopics: aiProfile.profile.weakTopics,
         recommendations: recommendations.data?.recommendations || recommendations.fallback?.recommendations || [],
         lastRefreshed: new Date(),
-        cooldownHours: 6
+        cooldownHours: 0 // Change to 6 for production
       });
       console.log('💾 Cache created');
     }
@@ -333,97 +336,31 @@ router.get('/performance', authMiddleware, async (req, res) => {
 // TODO: Replace these with actual database queries
 
 async function getAIProfile(userId) {
-  try {
-    // Fetch all user's questions
-    const questions = await Question.find({ userId, isDeleted: false });
-    
-    if (!questions || questions.length === 0) {
-      // Return default profile if no questions
-      return {
-        userId,
-        profile: {
-          totalProblems: 0,
-          currentStreak: 0,
-          lastSolved: null,
-          strongTopics: [],
-          weakTopics: []
-        }
-      };
+  // This should query your AIProfile model
+  // Example: return await AIProfile.findOne({ userId });
+  
+  // Temporary mock data for development
+  return {
+    userId,
+    profile: {
+      totalProblems: 20,
+      currentStreak: 1,
+      lastSolved: new Date(),
+      strongTopics: ['Sliding Window', 'Array', 'Hash Table'],
+      weakTopics: ['Linked List', 'Enumeration', 'Simulation']
     }
-    
-    // Analyze tags/topics frequency
-    const tagCount = {};
-    questions.forEach(q => {
-      if (q.tags && q.tags.length > 0) {
-        q.tags.forEach(tag => {
-          tagCount[tag] = (tagCount[tag] || 0) + 1;
-        });
-      }
-    });
-    
-    // Sort topics by frequency
-    const sortedTopics = Object.entries(tagCount)
-      .sort((a, b) => b[1] - a[1])
-      .map(([topic]) => topic);
-    
-    // Strong topics: top 40% of topics
-    const strongCount = Math.ceil(sortedTopics.length * 0.4);
-    const strongTopics = sortedTopics.slice(0, strongCount);
-    
-    // Weak topics: bottom 40% of topics (or topics with low count)
-    const weakTopics = sortedTopics.slice(-Math.ceil(sortedTopics.length * 0.4));
-    
-    return {
-      userId,
-      profile: {
-        totalProblems: questions.length,
-        currentStreak: 1, // TODO: Calculate actual streak
-        lastSolved: questions[0]?.dateAdded || new Date(),
-        strongTopics: strongTopics.length > 0 ? strongTopics : ['Array'],
-        weakTopics: weakTopics.length > 0 ? weakTopics : ['Dynamic Programming']
-      }
-    };
-  } catch (error) {
-    console.error('Error fetching AI profile:', error);
-    // Return default with basic topics on error
-    return {
-      userId,
-      profile: {
-        totalProblems: 0,
-        currentStreak: 0,
-        lastSolved: null,
-        strongTopics: ['Array', 'String'],
-        weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
-      }
-    };
-  }
+  };
 }
 
 async function getLeetCodeSubmissions(userId) {
-  try {
-    // Fetch user's questions as submissions
-    const questions = await Question.find({ userId, isDeleted: false })
-      .sort({ dateAdded: -1 })
-      .limit(50); // Last 50 submissions
-    
-    return {
-      userId,
-      submissions: questions.map(q => ({
-        title: q.title,
-        difficulty: q.difficulty,
-        tags: q.tags,
-        dateAdded: q.dateAdded,
-        isRevised: q.isRevised,
-        revisionCount: q.revisionCount
-      }))
-    };
-  } catch (error) {
-    console.error('Error fetching submissions:', error);
-    return {
-      userId,
-      submissions: []
-    };
-  }
+  // This should query your LeetCodeSubmission model
+  // Example: return await LeetCodeSubmission.findOne({ userId });
+  
+  // Temporary mock data for development
+  return {
+    userId,
+    submissions: []
+  };
 }
 
 module.exports = router;
