@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extension Storage Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .output {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Extension Storage Debugger</h1>
+  
+  <h2>Step 1: Login via Extension Popup</h2>
+  <p>Click the extension icon and login first!</p>
+  
+  <h2>Step 2: Check Storage</h2>
+  <button onclick="checkStorage()">Check Storage</button>
+  <button onclick="setTestData()">Set Test Data</button>
+  <button onclick="clearStorage()">Clear Storage</button>
+  
+  <h2>Output:</h2>
+  <div id="output" class="output">Click a button to start...</div>
+  
+  <script>
+    const output = document.getElementById('output');
+    
+    function log(message, type = 'normal') {
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'success' ? 'green' : type === 'error' ? 'red' : 'black';
+      output.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+    }
+    
+    function checkStorage() {
+      output.innerHTML = '';
+      log('Checking chrome.storage.local...');
+      
+      chrome.storage.local.get(null, (result) => {
+        if (chrome.runtime.lastError) {
+          log('❌ Error: ' + chrome.runtime.lastError.message, 'error');
+          return;
+        }
+        
+        log('=== ALL STORAGE DATA ===');
+        
+        if (Object.keys(result).length === 0) {
+          log('❌ Storage is empty! No data found.', 'error');
+          log('You need to login via the extension popup first.', 'error');
+        } else {
+          log('✅ Storage has data:', 'success');
+          
+          Object.keys(result).forEach(key => {
+            const value = result[key];
+            if (key === 'token') {
+              log(`  ${key}: ${value ? value.substring(0, 30) + '...' : 'null'}`, 'success');
+              log(`  Token length: ${value ? value.length : 0}`, 'success');
+            } else if (key === 'user') {
+              log(`  ${key}: ${JSON.stringify(value, null, 2)}`, 'success');
+            } else {
+              log(`  ${key}: ${JSON.stringify(value)}`, 'success');
+            }
+          });
+        }
+        
+        // Specific checks
+        log('\n=== SPECIFIC CHECKS ===');
+        if (result.token) {
+          log('✅ Token exists', 'success');
+        } else {
+          log('❌ Token missing', 'error');
+        }
+        
+        if (result.user) {
+          log('✅ User exists', 'success');
+        } else {
+          log('❌ User missing', 'error');
+        }
+      });
+    }
+    
+    function setTestData() {
+      output.innerHTML = '';
+      log('Setting test data...');
+      
+      const testData = {
+        testToken: 'test_' + Date.now(),
+        testUser: { email: 'test@test.com', username: 'tester' }
+      };
+      
+      chrome.storage.local.set(testData, () => {
+        if (chrome.runtime.lastError) {
+          log('❌ Error setting data: ' + chrome.runtime.lastError.message, 'error');
+          return;
+        }
+        
+        log('✅ Test data set successfully', 'success');
+        
+        // Verify it was saved
+        chrome.storage.local.get(['testToken', 'testUser'], (result) => {
+          if (result.testToken) {
+            log('✅ Verification: Can read test data back', 'success');
+            log('  testToken: ' + result.testToken, 'success');
+            log('  testUser: ' + JSON.stringify(result.testUser), 'success');
+          } else {
+            log('❌ Verification failed: Cannot read data back', 'error');
+          }
+        });
+      });
+    }
+    
+    function clearStorage() {
+      if (!confirm('Clear all extension storage?')) return;
+      
+      output.innerHTML = '';
+      log('Clearing storage...');
+      
+      chrome.storage.local.clear(() => {
+        if (chrome.runtime.lastError) {
+          log('❌ Error: ' + chrome.runtime.lastError.message, 'error');
+          return;
+        }
+        
+        log('✅ Storage cleared', 'success');
+        log('You need to login again via extension popup.', 'normal');
+      });
+    }
+    
+    // Auto-check on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('=== AUTO-CHECK ON PAGE LOAD ===\n');
+        checkStorage();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

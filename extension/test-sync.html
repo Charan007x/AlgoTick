@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Sync Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    .output { background: #f5f5f5; padding: 10px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Auth Sync Debugger</h1>
+  
+  <div class="test">
+    <h2>1. Check Current Auth State</h2>
+    <button onclick="checkAuth()">Check Auth</button>
+    <div id="authOutput" class="output"></div>
+  </div>
+  
+  <div class="test">
+    <h2>2. Check if Sync Script is Running</h2>
+    <button onclick="checkSyncScript()">Check Sync Script</button>
+    <div id="syncOutput" class="output"></div>
+  </div>
+  
+  <div class="test">
+    <h2>3. Manual Sync Test</h2>
+    <button onclick="manualSync()">Trigger Sync from Website to Extension</button>
+    <button onclick="syncFromExtension()">Trigger Sync from Extension to Website</button>
+    <div id="manualOutput" class="output"></div>
+  </div>
+  
+  <div class="test">
+    <h2>4. Live Console</h2>
+    <p>Open browser console (F12) to see real-time sync messages</p>
+  </div>
+  
+  <script>
+    function checkAuth() {
+      const output = document.getElementById('authOutput');
+      output.innerHTML = '=== CHECKING AUTH STATE ===\n\n';
+      
+      // Check website localStorage
+      const websiteToken = localStorage.getItem('token');
+      output.innerHTML += `Website (localStorage):\n`;
+      output.innerHTML += `  Token: ${websiteToken ? '✅ EXISTS (' + websiteToken.substring(0, 30) + '...)' : '❌ MISSING'}\n\n`;
+      
+      // Check extension storage
+      chrome.storage.local.get(['token', 'user'], (result) => {
+        output.innerHTML += `Extension (chrome.storage):\n`;
+        output.innerHTML += `  Token: ${result.token ? '✅ EXISTS (' + result.token.substring(0, 30) + '...)' : '❌ MISSING'}\n`;
+        output.innerHTML += `  User: ${result.user ? '✅ EXISTS (' + result.user.email + ')' : '❌ MISSING'}\n\n`;
+        
+        // Compare
+        if (websiteToken && result.token) {
+          if (websiteToken === result.token) {
+            output.innerHTML += '✅ SYNCED: Both have the same token!\n';
+          } else {
+            output.innerHTML += '❌ OUT OF SYNC: Different tokens!\n';
+          }
+        } else if (websiteToken && !result.token) {
+          output.innerHTML += '⚠️  OUT OF SYNC: Website has token, extension doesn\'t\n';
+        } else if (!websiteToken && result.token) {
+          output.innerHTML += '⚠️  OUT OF SYNC: Extension has token, website doesn\'t\n';
+        } else {
+          output.innerHTML += '❌ Both are logged out\n';
+        }
+      });
+    }
+    
+    function checkSyncScript() {
+      const output = document.getElementById('syncOutput');
+      output.innerHTML = '=== CHECKING SYNC SCRIPT ===\n\n';
+      
+      // Check if chrome.storage is available
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        output.innerHTML += '✅ chrome.storage API is available\n';
+      } else {
+        output.innerHTML += '❌ chrome.storage API is NOT available\n';
+      }
+      
+      // Check if sync.js is loaded
+      const scripts = Array.from(document.scripts).map(s => s.src);
+      const hasSyncScript = scripts.some(src => src.includes('sync.js'));
+      
+      output.innerHTML += hasSyncScript ? '✅ sync.js is loaded\n' : '❌ sync.js is NOT loaded\n';
+      output.innerHTML += '\n';
+      output.innerHTML += 'Console should show:\n';
+      output.innerHTML += '  "🔄 Auth sync script loaded on localhost:3000"\n';
+      output.innerHTML += '  Check browser console (F12) to verify\n';
+    }
+    
+    async function manualSync() {
+      const output = document.getElementById('manualOutput');
+      output.innerHTML = '=== MANUAL SYNC: Website → Extension ===\n\n';
+      
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        output.innerHTML += '❌ No token in website localStorage\n';
+        output.innerHTML += 'Please login first!\n';
+        return;
+      }
+      
+      output.innerHTML += 'Fetching user info from backend...\n';
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const user = data.user;
+          
+          output.innerHTML += `✅ Got user: ${user.email}\n`;
+          output.innerHTML += 'Saving to extension storage...\n';
+          
+          chrome.storage.local.set({ token, user }, () => {
+            output.innerHTML += '✅ Saved to extension!\n';
+            output.innerHTML += '\nNow check extension popup - should be logged in!\n';
+          });
+        } else {
+          output.innerHTML += '❌ Failed to fetch user (invalid token?)\n';
+        }
+      } catch (e) {
+        output.innerHTML += '❌ Error: ' + e.message + '\n';
+      }
+    }
+    
+    function syncFromExtension() {
+      const output = document.getElementById('manualOutput');
+      output.innerHTML = '=== MANUAL SYNC: Extension → Website ===\n\n';
+      
+      chrome.storage.local.get(['token', 'user'], (result) => {
+        if (result.token && result.user) {
+          localStorage.setItem('token', result.token);
+          output.innerHTML += '✅ Token copied from extension to website\n';
+          output.innerHTML += 'Reloading page in 2 seconds...\n';
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          output.innerHTML += '❌ Extension has no auth data\n';
+          output.innerHTML += 'Please login via extension first!\n';
+        }
+      });
+    }
+    
+    // Auto-check on load
+    setTimeout(checkAuth, 500);
+  </script>
+</body>
+</html>
