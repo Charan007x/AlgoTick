@@ -204,137 +204,45 @@ class AICoachService {
     const weakTopic = aiProfile.profile.weakTopics[0];
     const weakTopic2 = aiProfile.profile.weakTopics[1];
     
-    // Hardcoded real LeetCode problems for many topics
+    // Hardcoded real LeetCode problems for weak topics
     const problemsByTopic = {
       'Linked List': [
         { title: 'Reverse Linked List', slug: 'reverse-linked-list', difficulty: 'Easy' },
         { title: 'Merge Two Sorted Lists', slug: 'merge-two-sorted-lists', difficulty: 'Easy' },
-        { title: 'Remove Nth Node From End of List', slug: 'remove-nth-node-from-end-of-list', difficulty: 'Medium' },
-        { title: 'Add Two Numbers', slug: 'add-two-numbers', difficulty: 'Medium' }
+        { title: 'Remove Nth Node From End of List', slug: 'remove-nth-node-from-end-of-list', difficulty: 'Medium' }
       ],
       'Tree': [
         { title: 'Maximum Depth of Binary Tree', slug: 'maximum-depth-of-binary-tree', difficulty: 'Easy' },
         { title: 'Invert Binary Tree', slug: 'invert-binary-tree', difficulty: 'Easy' },
-        { title: 'Binary Tree Level Order Traversal', slug: 'binary-tree-level-order-traversal', difficulty: 'Medium' },
-        { title: 'Validate Binary Search Tree', slug: 'validate-binary-search-tree', difficulty: 'Medium' }
+        { title: 'Binary Tree Level Order Traversal', slug: 'binary-tree-level-order-traversal', difficulty: 'Medium' }
       ],
       'Dynamic Programming': [
         { title: 'Climbing Stairs', slug: 'climbing-stairs', difficulty: 'Easy' },
         { title: 'House Robber', slug: 'house-robber', difficulty: 'Medium' },
-        { title: 'Coin Change', slug: 'coin-change', difficulty: 'Medium' },
-        { title: 'Longest Increasing Subsequence', slug: 'longest-increasing-subsequence', difficulty: 'Medium' }
+        { title: 'Coin Change', slug: 'coin-change', difficulty: 'Medium' }
       ],
       'Graph': [
         { title: 'Number of Islands', slug: 'number-of-islands', difficulty: 'Medium' },
         { title: 'Clone Graph', slug: 'clone-graph', difficulty: 'Medium' },
-        { title: 'Course Schedule', slug: 'course-schedule', difficulty: 'Medium' },
-        { title: 'Pacific Atlantic Water Flow', slug: 'pacific-atlantic-water-flow', difficulty: 'Medium' }
+        { title: 'Course Schedule', slug: 'course-schedule', difficulty: 'Medium' }
       ],
       'Binary Search': [
         { title: 'Binary Search', slug: 'binary-search', difficulty: 'Easy' },
         { title: 'Search Insert Position', slug: 'search-insert-position', difficulty: 'Easy' },
-        { title: 'Find First and Last Position of Element in Sorted Array', slug: 'find-first-and-last-position-of-element-in-sorted-array', difficulty: 'Medium' },
-        { title: 'Search in Rotated Sorted Array', slug: 'search-in-rotated-sorted-array', difficulty: 'Medium' }
-      ],
-      'Array': [
-        { title: 'Two Sum', slug: 'two-sum', difficulty: 'Easy' },
-        { title: 'Best Time to Buy and Sell Stock', slug: 'best-time-to-buy-and-sell-stock', difficulty: 'Easy' },
-        { title: 'Product of Array Except Self', slug: 'product-of-array-except-self', difficulty: 'Medium' },
-        { title: 'Maximum Subarray', slug: 'maximum-subarray', difficulty: 'Medium' }
-      ],
-      'String': [
-        { title: 'Valid Palindrome', slug: 'valid-palindrome', difficulty: 'Easy' },
-        { title: 'Valid Anagram', slug: 'valid-anagram', difficulty: 'Easy' },
-        { title: 'Longest Substring Without Repeating Characters', slug: 'longest-substring-without-repeating-characters', difficulty: 'Medium' },
-        { title: 'Group Anagrams', slug: 'group-anagrams', difficulty: 'Medium' }
-      ],
-      'Hash Table': [
-        { title: 'Two Sum', slug: 'two-sum', difficulty: 'Easy' },
-        { title: 'Contains Duplicate', slug: 'contains-duplicate', difficulty: 'Easy' },
-        { title: 'Group Anagrams', slug: 'group-anagrams', difficulty: 'Medium' },
-        { title: 'Subarray Sum Equals K', slug: 'subarray-sum-equals-k', difficulty: 'Medium' }
-      ],
-      'Sliding Window': [
-        { title: 'Best Time to Buy and Sell Stock', slug: 'best-time-to-buy-and-sell-stock', difficulty: 'Easy' },
-        { title: 'Longest Substring Without Repeating Characters', slug: 'longest-substring-without-repeating-characters', difficulty: 'Medium' },
-        { title: 'Minimum Window Substring', slug: 'minimum-window-substring', difficulty: 'Hard' },
-        { title: 'Sliding Window Maximum', slug: 'sliding-window-maximum', difficulty: 'Hard' }
-      ],
-      'Stack': [
-        { title: 'Valid Parentheses', slug: 'valid-parentheses', difficulty: 'Easy' },
-        { title: 'Min Stack', slug: 'min-stack', difficulty: 'Medium' },
-        { title: 'Daily Temperatures', slug: 'daily-temperatures', difficulty: 'Medium' },
-        { title: 'Largest Rectangle in Histogram', slug: 'largest-rectangle-in-histogram', difficulty: 'Hard' }
-      ],
-      'Queue': [
-        { title: 'Implement Queue using Stacks', slug: 'implement-queue-using-stacks', difficulty: 'Easy' },
-        { title: 'Number of Recent Calls', slug: 'number-of-recent-calls', difficulty: 'Easy' },
-        { title: 'Design Circular Queue', slug: 'design-circular-queue', difficulty: 'Medium' },
-        { title: 'Sliding Window Maximum', slug: 'sliding-window-maximum', difficulty: 'Hard' }
-      ],
-      'Heap': [
-        { title: 'Kth Largest Element in an Array', slug: 'kth-largest-element-in-an-array', difficulty: 'Medium' },
-        { title: 'Top K Frequent Elements', slug: 'top-k-frequent-elements', difficulty: 'Medium' },
-        { title: 'Find Median from Data Stream', slug: 'find-median-from-data-stream', difficulty: 'Hard' },
-        { title: 'Merge K Sorted Lists', slug: 'merge-k-sorted-lists', difficulty: 'Hard' }
-      ],
-      'Breadth-First Search': [
-        { title: 'Binary Tree Level Order Traversal', slug: 'binary-tree-level-order-traversal', difficulty: 'Medium' },
-        { title: 'Rotting Oranges', slug: 'rotting-oranges', difficulty: 'Medium' },
-        { title: 'Word Ladder', slug: 'word-ladder', difficulty: 'Hard' },
-        { title: 'Binary Tree Right Side View', slug: 'binary-tree-right-side-view', difficulty: 'Medium' }
-      ],
-      'Depth-First Search': [
-        { title: 'Maximum Depth of Binary Tree', slug: 'maximum-depth-of-binary-tree', difficulty: 'Easy' },
-        { title: 'Path Sum', slug: 'path-sum', difficulty: 'Easy' },
-        { title: 'Number of Islands', slug: 'number-of-islands', difficulty: 'Medium' },
-        { title: 'Course Schedule', slug: 'course-schedule', difficulty: 'Medium' }
-      ],
-      'Backtracking': [
-        { title: 'Subsets', slug: 'subsets', difficulty: 'Medium' },
-        { title: 'Permutations', slug: 'permutations', difficulty: 'Medium' },
-        { title: 'Combination Sum', slug: 'combination-sum', difficulty: 'Medium' },
-        { title: 'N-Queens', slug: 'n-queens', difficulty: 'Hard' }
-      ],
-      'Greedy': [
-        { title: 'Best Time to Buy and Sell Stock', slug: 'best-time-to-buy-and-sell-stock', difficulty: 'Easy' },
-        { title: 'Jump Game', slug: 'jump-game', difficulty: 'Medium' },
-        { title: 'Gas Station', slug: 'gas-station', difficulty: 'Medium' },
-        { title: 'Jump Game II', slug: 'jump-game-ii', difficulty: 'Medium' }
-      ],
-      'Enumeration': [
-        { title: 'Fizz Buzz', slug: 'fizz-buzz', difficulty: 'Easy' },
-        { title: 'Count Primes', slug: 'count-primes', difficulty: 'Medium' },
-        { title: 'Happy Number', slug: 'happy-number', difficulty: 'Easy' },
-        { title: 'Subsets', slug: 'subsets', difficulty: 'Medium' }
-      ],
-      'Simulation': [
-        { title: 'Spiral Matrix', slug: 'spiral-matrix', difficulty: 'Medium' },
-        { title: 'Rotate Image', slug: 'rotate-image', difficulty: 'Medium' },
-        { title: 'Set Matrix Zeroes', slug: 'set-matrix-zeroes', difficulty: 'Medium' },
-        { title: 'Game of Life', slug: 'game-of-life', difficulty: 'Medium' }
-      ],
-      'Two Pointers': [
-        { title: 'Valid Palindrome', slug: 'valid-palindrome', difficulty: 'Easy' },
-        { title: 'Two Sum II', slug: 'two-sum-ii-input-array-is-sorted', difficulty: 'Medium' },
-        { title: 'Container With Most Water', slug: 'container-with-most-water', difficulty: 'Medium' },
-        { title: 'Trapping Rain Water', slug: 'trapping-rain-water', difficulty: 'Hard' }
-      ],
-      'Trie': [
-        { title: 'Implement Trie', slug: 'implement-trie-prefix-tree', difficulty: 'Medium' },
-        { title: 'Design Add and Search Words Data Structure', slug: 'design-add-and-search-words-data-structure', difficulty: 'Medium' },
-        { title: 'Word Search II', slug: 'word-search-ii', difficulty: 'Hard' },
-        { title: 'Longest Word in Dictionary', slug: 'longest-word-in-dictionary', difficulty: 'Medium' }
+        { title: 'Find First and Last Position of Element in Sorted Array', slug: 'find-first-and-last-position-of-element-in-sorted-array', difficulty: 'Medium' }
       ]
     };
     
-    // Get problems for weak topics, fallback to Array problems if topic not found
-    const weakTopicProblems = problemsByTopic[weakTopic] || problemsByTopic['Array'];
-    const weakTopic2Problems = problemsByTopic[weakTopic2] || problemsByTopic['String'];
+    const weakTopicProblems = problemsByTopic[weakTopic] || [
+      { title: `${weakTopic} Practice Problem 1`, slug: 'practice-1', difficulty: 'Easy' },
+      { title: `${weakTopic} Practice Problem 2`, slug: 'practice-2', difficulty: 'Medium' }
+    ];
+    
+    const weakTopic2Problems = problemsByTopic[weakTopic2] || [];
     
     const recommendations = [];
     
-    // Add 3 problems from first weak topic
+    // Add 2-3 problems from first weak topic
     weakTopicProblems.slice(0, 3).forEach(prob => {
       recommendations.push({
         title: prob.title,
@@ -343,12 +251,12 @@ class AICoachService {
         topics: [weakTopic],
         reason: `Build foundation in ${weakTopic}`,
         leetcodeUrl: `https://leetcode.com/problems/${prob.slug}/`,
-        estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : prob.difficulty === 'Medium' ? '30-45 mins' : '45-60 mins'
+        estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : '30-45 mins'
       });
     });
     
-    // Add 1-2 problems from second weak topic if it exists
-    if (weakTopic2 && weakTopic2Problems.length > 0) {
+    // Add 1-2 problems from second weak topic
+    if (weakTopic2Problems.length > 0) {
       weakTopic2Problems.slice(0, 2).forEach(prob => {
         recommendations.push({
           title: prob.title,
@@ -357,7 +265,7 @@ class AICoachService {
           topics: [weakTopic2],
           reason: `Strengthen ${weakTopic2} skills`,
           leetcodeUrl: `https://leetcode.com/problems/${prob.slug}/`,
-          estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : prob.difficulty === 'Medium' ? '30-45 mins' : '45-60 mins'
+          estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : '30-45 mins'
         });
       });
     }

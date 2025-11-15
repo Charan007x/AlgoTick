@@ -254,9 +254,7 @@ const AICoach = () => {
                       >
                         {rec.difficulty}
                       </span>
-                      <span className="text-purple-300 font-medium">
-                        {rec.topics && rec.topics.length > 0 ? rec.topics.join(', ') : rec.topic || 'General'}
-                      </span>
+                      <span className="text-purple-300 font-medium">{rec.topic}</span>
                     </div>
                     {rec.reason && (
                       <p className="text-sm text-white/60 mt-2">{rec.reason}</p>
