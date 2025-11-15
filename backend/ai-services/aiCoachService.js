@@ -115,6 +115,9 @@ class AICoachService {
   // ============ FALLBACK METHODS ============
   
   getFallbackInsights(aiProfile) {
+    const weeklyGoal = aiProfile.weeklyGoal || aiProfile.profile?.weakTopics?.[0] || 'Dynamic Programming';
+    const focusTopic = typeof weeklyGoal === 'string' ? weeklyGoal : (weeklyGoal.focusTopic || 'Dynamic Programming');
+    
     return {
       insights: aiProfile.insights || [
         "✅ Keep up the consistent practice!",
@@ -129,7 +132,7 @@ class AICoachService {
         "Review your old solutions to reinforce learning."
       ],
       nextSteps: [
-        `Focus on ${aiProfile.weeklyGoal.focusTopic}`,
+        `Focus on ${focusTopic}`,
         "Solve at least 2 problems daily",
         "Review weak topics regularly"
       ]
@@ -137,8 +140,9 @@ class AICoachService {
   }
 
   getFallbackStudyPlan(aiProfile) {
-    const focusTopic = aiProfile.weeklyGoal.focusTopic;
-    const weakTopics = aiProfile.profile.weakTopics;
+    const weakTopics = aiProfile.profile?.weakTopics || [];
+    const focusTopic = weakTopics[0] || 'Dynamic Programming';
+    const secondTopic = weakTopics[1] || 'Graph';
     
     return {
       weeklyPlan: [
@@ -158,7 +162,7 @@ class AICoachService {
         },
         {
           day: 3,
-          focus: weakTopics[1] || "Review",
+          focus: secondTopic,
           problems: ["Mix of Easy and Medium"],
           goal: "Strengthen weak areas",
           estimatedTime: "1-2 hours"
@@ -201,8 +205,9 @@ class AICoachService {
   }
 
   getFallbackRecommendations(aiProfile) {
-    const weakTopic = aiProfile.profile.weakTopics[0];
-    const weakTopic2 = aiProfile.profile.weakTopics[1];
+    const weakTopics = aiProfile.profile?.weakTopics || [];
+    const weakTopic = weakTopics[0] || 'Dynamic Programming';
+    const weakTopic2 = weakTopics[1] || 'Graph';
     
     // Hardcoded real LeetCode problems for weak topics
     const problemsByTopic = {
