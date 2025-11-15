@@ -1,0 +1,160 @@
+🧠 AlgoTick AI Profile Specification
+
+Document version: 1.0
+Last updated: 2025-11-03
+Purpose: Defines the data schema and interpretation logic for the AI assistant integrated in AlgoTick. The AI uses this profile to understand a user’s coding progress, behavior, and weaknesses.
+
+1️⃣ Overview
+
+The AI Profile is a structured JSON document summarizing a user’s performance and learning behavior.
+It is periodically updated (daily or on major events such as problem solved or revised).
+
+The AI uses this data to:
+
+Analyze progress trends
+
+Identify strengths and weaknesses
+
+Suggest next focus areas or practice plans
+
+Generate personalized insights and encouragement
+
+2️⃣ Data Structure
+🧩 Root Structure
+{
+  "userId": "string",
+  "lastUpdated": "ISO 8601 datetime",
+  "stats": { ... },
+  "topicStats": { ... },
+  "progressTrends": { ... },
+  "behavior": { ... }
+}
+
+3️⃣ Fields Explained
+🔹 userId
+
+Type: string
+
+Description: Unique identifier for the user in the database.
+
+Example: "u123"
+
+🔹 lastUpdated
+
+Type: string (ISO 8601 datetime)
+
+Description: Timestamp when this profile was last refreshed.
+
+Example: "2025-11-03T08:00:00Z"
+
+🔹 stats
+
+Summary of the user’s overall performance.
+
+Field	Type	Description	Example
+totalSolved	number	Total problems solved by user	120
+averageAccuracy	number	% of problems solved correctly without needing hints	81
+streak	number	Consecutive active days	14
+activeTopics	array<string>	Topics recently practiced	["Arrays", "Binary Search", "DP"]
+weakTopics	array<string>	Topics where accuracy < 60%	["Graphs", "Recursion"]
+revisionPending	number	Questions due for revision	5
+🔹 topicStats
+
+Detailed breakdown per topic.
+
+Each topic is a key with the following structure:
+
+Field	Type	Description	Example
+solved	number	Problems solved in this topic	45
+accuracy	number	% success rate in this topic	92
+trend	string	Week-over-week accuracy change	"+5%"
+recentMistakes	number	Count of incorrect submissions in last 7 days	2
+
+📘 Note:
+The AI uses this to detect weak areas (accuracy < 60%) or stagnation (trend is negative).
+
+🔹 progressTrends
+Field	Type	Description	Example
+lastWeekImprovement	string	Change in average accuracy from last week	"+6%"
+strongestGrowth	string	Topic showing highest improvement	"DP"
+focusRecommendation	string	Topic needing most attention	"Graphs"
+🔹 behavior
+Field	Type	Description	Example
+preferredDifficulty	string	Difficulty level most practiced (Easy, Medium, Hard)	"Medium"
+timeOfDay	string	When user is most active (Morning, Afternoon, Night)	"Night"
+averageSolveTimeMinutes	number	Average time taken per problem	14
+4️⃣ AI Interpretation Rules
+
+Strengths → Topics with accuracy >= 80% and trend >= 0%.
+Example output: “Your array skills are strong and consistent.”
+
+Weaknesses → Topics with accuracy < 60% or negative trend.
+Example output: “Graph problems are dropping in accuracy — focus here.”
+
+Growth → Compare trend and lastWeekImprovement to highlight improvement velocity.
+Example: “You’ve improved by 6% this week, especially in DP!”
+
+Behavior Insights → Use timeOfDay and averageSolveTimeMinutes to personalize productivity tips.
+Example: “You perform best at night. Schedule your revisions after 8 PM.”
+
+Recommendations →
+
+Select focusRecommendation for next week’s practice
+
+Suggest daily target = revisionPending / 3 (roughly)
+
+5️⃣ Update Frequency
+Event	Trigger	Update Action
+Problem solved	After successful solve sync	Update topicStats for that topic
+Revision done	On mark as revised	Reduce revisionPending
+Daily cron	00:00 UTC	Refresh trend, weakTopics, lastWeekImprovement
+6️⃣ Example JSON
+{
+  "userId": "u123",
+  "lastUpdated": "2025-11-03T08:00:00Z",
+  "stats": {
+    "totalSolved": 120,
+    "averageAccuracy": 81,
+    "streak": 14,
+    "activeTopics": ["Arrays", "Binary Search", "DP"],
+    "weakTopics": ["Graphs", "Recursion"],
+    "revisionPending": 5
+  },
+  "topicStats": {
+    "Arrays": { "solved": 45, "accuracy": 92, "trend": "+5%", "recentMistakes": 2 },
+    "Binary Search": { "solved": 30, "accuracy": 87, "trend": "+2%" },
+    "Dynamic Programming": { "solved": 15, "accuracy": 68, "trend": "-4%" },
+    "Graphs": { "solved": 10, "accuracy": 40, "trend": "+1%" },
+    "Recursion": { "solved": 8, "accuracy": 55, "trend": "-3%" }
+  },
+  "progressTrends": {
+    "lastWeekImprovement": "+6%",
+    "strongestGrowth": "DP",
+    "focusRecommendation": "Graphs"
+  },
+  "behavior": {
+    "preferredDifficulty": "Medium",
+    "timeOfDay": "Night",
+    "averageSolveTimeMinutes": 14
+  }
+}
+
+7️⃣ AI Prompting Guide (for Gemini or similar)
+
+When calling the AI model, provide this JSON as context with a system message like:
+
+“You are AlgoTick AI — a personal coding coach.
+Analyze the following JSON performance profile and generate:
+
+Three personalized insights (strengths, weaknesses, suggestions).
+
+One weekly goal recommendation.
+
+A short motivational message.”
+
+Example output from Gemini:
+
+✅ You’ve shown strong consistency in Arrays and Binary Search (92%, 87%).
+⚠️ Focus more on Graphs — your accuracy is just 40%, but improving slowly.
+🎯 Goal: Solve 3 Graph problems this week.
+💬 Keep your 14-day streak going — you’re on fire!

@@ -67,4 +67,11 @@ export const listsAPI = {
   addAllToToday: (id) => api.post(`/lists/${id}/add-all-to-today`),
 };
 
+// AI API
+export const aiAPI = {
+  getInsights: () => api.get('/ai/insights'),
+  refreshInsights: () => api.post('/ai/refresh'),
+  syncLeetCode: () => api.post('/ai/sync-leetcode'),
+};
+
 export default api;

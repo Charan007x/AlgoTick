@@ -39,17 +39,15 @@ const AddQuestionForm = ({ onQuestionAdded }) => {
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 animate-fadeIn">
-      <h2 className="text-2xl font-bold mb-6 text-white">Add New Question</h2>
-      
+    <div>
       {error && (
-        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl backdrop-blur-sm animate-slideIn">
+        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl backdrop-blur-sm">
           {error}
         </div>
       )}
       
       {success && (
-        <div className="mb-4 p-4 bg-[#61dca3]/10 border border-[#61dca3]/20 text-[#61dca3] rounded-xl backdrop-blur-sm animate-slideIn">
+        <div className="mb-4 p-4 bg-[#61dca3]/10 border border-[#61dca3]/20 text-[#61dca3] rounded-xl backdrop-blur-sm">
           {success}
         </div>
       )}

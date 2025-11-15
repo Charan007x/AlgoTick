@@ -16,9 +16,11 @@ const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const questionRoutes = require('./routes/questions');
 const listRoutes = require('./routes/lists');
+const aiRoutes = require('./routes/ai');
 
 // Import reminder service
 const { checkReminders } = require('./services/reminderService');
+const { initAIProfileCron } = require('./services/aiCronService');
 
 const app = express();
 
@@ -80,6 +82,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-
 app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/lists', listRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -95,6 +98,9 @@ cron.schedule('0 8 * * *', () => {
   console.log('🔔 Running daily reminder check...');
   checkReminders();
 });
+
+// Initialize AI Profile Cron Job (runs every day at 2 AM)
+initAIProfileCron();
 
 // Error handling middleware
 app.use((err, req, res, next) => {

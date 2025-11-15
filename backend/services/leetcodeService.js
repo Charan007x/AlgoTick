@@ -402,5 +402,228 @@ module.exports = {
   getUserSubmissions,
   checkSubmissionOnDate,
   checkSubmissionAfterDate,
-  getUserActivitySummary
+  getUserActivitySummary,
+  fetchRecentSubmissions,
+  saveLeetCodeSubmissions,
+  getLeetCodeSubmissions,
+  buildProfileFromLeetCodeSubmissions
 };
+
+/**
+ * Fetch recent accepted submissions from LeetCode GraphQL API
+ * @param {string} leetcodeUsername - LeetCode username
+ * @param {number} limit - Number of submissions to fetch (default: 20)
+ * @returns {Promise<Array>} Array of recent submissions
+ */
+async function fetchRecentSubmissions(leetcodeUsername, limit = 20) {
+  try {
+    console.log(`🔍 [LeetCode API] Fetching recent submissions for: ${leetcodeUsername}`);
+    
+    const query = `
+      query recentAcSubmissions($username: String!, $limit: Int!) {
+        recentAcSubmissionList(username: $username, limit: $limit) {
+          id
+          title
+          titleSlug
+          timestamp
+        }
+      }
+    `;
+    
+    const response = await axios.post('https://leetcode.com/graphql', {
+      query: query,
+      variables: {
+        username: leetcodeUsername,
+        limit: limit
+      }
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': 'https://leetcode.com'
+      }
+    });
+    
+    if (!response.data || !response.data.data) {
+      throw new Error('Invalid response from LeetCode API');
+    }
+    
+    const submissions = response.data.data.recentAcSubmissionList || [];
+    
+    console.log(`✅ [LeetCode API] Fetched ${submissions.length} submissions`);
+    
+    // Fetch detailed info for each submission
+    const detailedSubmissions = await Promise.all(
+      submissions.slice(0, limit).map(async (submission) => {
+        try {
+          const problemData = await fetchLeetCodeProblem(submission.titleSlug);
+          return {
+            title: submission.title,
+            titleSlug: submission.titleSlug,
+            timestamp: new Date(parseInt(submission.timestamp) * 1000),
+            statusDisplay: 'Accepted',
+            difficulty: problemData.difficulty,
+            questionId: problemData.questionId,
+            topics: problemData.tags || [],
+          };
+        } catch (error) {
+          console.error(`⚠️ Failed to fetch details for ${submission.titleSlug}:`, error.message);
+          return {
+            title: submission.title,
+            titleSlug: submission.titleSlug,
+            timestamp: new Date(parseInt(submission.timestamp) * 1000),
+            statusDisplay: 'Accepted',
+            difficulty: 'Unknown',
+            topics: []
+          };
+        }
+      })
+    );
+    
+    return detailedSubmissions;
+    
+  } catch (error) {
+    console.error('❌ [LeetCode API] Error fetching submissions:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Save LeetCode submissions to database
+ * @param {string} userId - User ID
+ * @param {string} leetcodeUsername - LeetCode username
+ * @returns {Promise<Object>} Saved submissions document
+ */
+async function saveLeetCodeSubmissions(userId, leetcodeUsername) {
+  try {
+    const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+    
+    console.log(`💾 [LeetCode Sync] Saving submissions for user: ${userId}`);
+    
+    const submissions = await fetchRecentSubmissions(leetcodeUsername, 20);
+    
+    // Update or create submission document
+    const submissionDoc = await LeetCodeSubmission.findOneAndUpdate(
+      { userId },
+      {
+        userId,
+        submissions,
+        lastFetched: new Date()
+      },
+      { upsert: true, new: true }
+    );
+    
+    console.log(`✅ [LeetCode Sync] Saved ${submissions.length} submissions to database`);
+    
+    return submissionDoc;
+    
+  } catch (error) {
+    console.error('❌ [LeetCode Sync] Error saving submissions:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Get LeetCode submissions from database (with cache)
+ * Fetches fresh data if cache is older than 24 hours
+ * @param {string} userId - User ID
+ * @param {string} leetcodeUsername - LeetCode username
+ * @returns {Promise<Array>} Array of submissions
+ */
+async function getLeetCodeSubmissions(userId, leetcodeUsername) {
+  try {
+    const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+    
+    const submissionDoc = await LeetCodeSubmission.findOne({ userId });
+    
+    // Check if we need to refresh (older than 24 hours or doesn't exist)
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    if (!submissionDoc || submissionDoc.lastFetched < twentyFourHoursAgo) {
+      console.log('🔄 [LeetCode Sync] Cache expired or missing, fetching fresh data...');
+      const freshDoc = await saveLeetCodeSubmissions(userId, leetcodeUsername);
+      return freshDoc.submissions;
+    }
+    
+    console.log(`✅ [LeetCode Sync] Using cached submissions (last fetched: ${submissionDoc.lastFetched})`);
+    return submissionDoc.submissions;
+    
+  } catch (error) {
+    console.error('❌ [LeetCode Sync] Error getting submissions:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Build profile data from LeetCode submissions (fallback when AlgoTick data is insufficient)
+ * @param {Array} submissions - LeetCode submissions
+ * @returns {Object} Profile data for AI insights
+ */
+function buildProfileFromLeetCodeSubmissions(submissions) {
+  console.log('🔄 [LeetCode Fallback] Building profile from LeetCode submissions');
+  
+  if (!submissions || submissions.length === 0) {
+    return null;
+  }
+  
+  // Calculate topic breakdown
+  const topicStats = {};
+  submissions.forEach(sub => {
+    if (sub.topics && sub.topics.length > 0) {
+      sub.topics.forEach(topic => {
+        if (!topicStats[topic]) {
+          topicStats[topic] = { count: 0, difficulty: {} };
+        }
+        topicStats[topic].count += 1;
+        topicStats[topic].difficulty[sub.difficulty] = 
+          (topicStats[topic].difficulty[sub.difficulty] || 0) + 1;
+      });
+    }
+  });
+  
+  // Sort topics by frequency
+  const sortedTopics = Object.entries(topicStats)
+    .sort(([, a], [, b]) => b.count - a.count)
+    .map(([topic, stats]) => ({ topic, ...stats }));
+  
+  // Identify strong topics (top 3 by frequency)
+  const strongTopics = sortedTopics.slice(0, 3).map(t => t.topic);
+  
+  // Identify weak topics (least practiced but present)
+  const weakTopics = sortedTopics.slice(-3).map(t => t.topic).reverse();
+  
+  // Calculate difficulty distribution
+  const difficultyCount = { Easy: 0, Medium: 0, Hard: 0 };
+  submissions.forEach(sub => {
+    if (difficultyCount.hasOwnProperty(sub.difficulty)) {
+      difficultyCount[sub.difficulty] += 1;
+    }
+  });
+  
+  // Calculate activity metrics
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const recentSubmissions = submissions.filter(sub => 
+    new Date(sub.timestamp) >= sevenDaysAgo
+  );
+  
+  return {
+    totalSolved: submissions.length,
+    recentActivity: recentSubmissions.length,
+    streak: recentSubmissions.length > 0 ? 1 : 0, // Simplified streak
+    strongTopics,
+    weakTopics,
+    topicBreakdown: topicStats,
+    difficultyDistribution: difficultyCount,
+    dataSource: 'leetcode', // Flag to indicate data source
+    revisionRate: 0, // No revision data from LeetCode
+    overdueQuestions: 0,
+    topicAccuracy: sortedTopics.map(t => ({
+      topic: t.topic,
+      solved: t.count,
+      revised: 0,
+      accuracy: 0,
+      lastWeekCount: t.count
+    }))
+  };
+}

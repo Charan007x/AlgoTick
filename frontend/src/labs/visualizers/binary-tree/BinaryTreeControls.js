@@ -45,7 +45,7 @@ export function BinaryTreeControls({
       {/* Traversal Controls Card */}
       <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-4">
         <h3 className="text-lg font-semibold mb-4">Traversal Controls</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => onTraversal("inorder")} 
             disabled={isAnimating}
@@ -71,13 +71,21 @@ export function BinaryTreeControls({
             Post-Order
           </button>
           <button 
-            onClick={onClear}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium 
-                     transition-colors"
+            onClick={() => onTraversal("levelorder")} 
+            disabled={isAnimating}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg font-medium 
+                     transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Clear
+            Level-Order
           </button>
         </div>
+        <button 
+          onClick={onClear}
+          className="w-full mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium 
+                   transition-colors"
+        >
+          Clear
+        </button>
       </div>
 
       {/* Traversal History */}
