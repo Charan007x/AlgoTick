@@ -10,6 +10,7 @@ import CustomLists from './pages/CustomLists';
 import Settings from './components/Settings';
 import OAuthCallback from './pages/OAuthCallback';
 import TestAuth from './pages/TestAuth';
+import TestDashboard from './test/TestDashboard';
 import Labs from './labs/Labs';
 import './index.css';
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/test-auth" element={<TestAuth />} />
+          <Route path="/test-dashboard" element={<TestDashboard />} />
           <Route
             path="/dashboard"
             element={
