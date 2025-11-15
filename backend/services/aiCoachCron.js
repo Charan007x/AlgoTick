@@ -22,8 +22,8 @@ async function getAIProfile(userId) {
           totalProblems: 0,
           currentStreak: 0,
           lastSolved: null,
-          strongTopics: [],
-          weakTopics: []
+          strongTopics: ['Array', 'String'],
+          weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
         }
       };
     }

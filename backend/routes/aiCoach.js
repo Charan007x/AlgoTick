@@ -62,11 +62,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
     console.log('📝 AI Profile:', aiProfile);
 
-    if (!aiProfile) {
-      return res.status(404).json({ message: 'AI profile not found' });
-    }
-
-    // Generate recommendations
+    // Generate recommendations (even for users with no questions)
     console.log('🤖 Calling AI Coach service...');
     const recommendations = await aiCoachService.getRecommendations(
       aiProfile,
@@ -91,7 +87,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         weakTopics: aiProfile.profile.weakTopics,
         recommendations: recommendations.data?.recommendations || recommendations.fallback?.recommendations || [],
         lastRefreshed: new Date(),
-        cooldownHours: 0 // Change to 6 for production
+        cooldownHours: 6
       });
       console.log('💾 Cache created');
     }
@@ -389,15 +385,15 @@ async function getAIProfile(userId) {
     };
   } catch (error) {
     console.error('Error fetching AI profile:', error);
-    // Return default on error
+    // Return default with basic topics on error
     return {
       userId,
       profile: {
         totalProblems: 0,
         currentStreak: 0,
         lastSolved: null,
-        strongTopics: [],
-        weakTopics: []
+        strongTopics: ['Array', 'String'],
+        weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
       }
     };
   }
