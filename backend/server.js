@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const cron = require('node-cron');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 // Load environment variables FIRST
 dotenv.config();
@@ -17,6 +18,7 @@ const authRoutes = require('./routes/auth');
 const questionRoutes = require('./routes/questions');
 const listRoutes = require('./routes/lists');
 const aiCoachRoutes = require('./routes/aiCoach');
+const notesRoutes = require('./routes/notes');
 
 // Import reminder service
 const { checkReminders } = require('./services/reminderService');
@@ -70,11 +72,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Serve uploaded files with proper path
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-tracker', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-tracker')
 .then(() => console.log('✅ MongoDB connected successfully'))
 .catch((err) => console.error('❌ MongoDB connection error:', err));
 
@@ -83,6 +85,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/ai-coach', aiCoachRoutes);
+app.use('/api/notes', notesRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

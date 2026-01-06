@@ -412,19 +412,6 @@ const CustomLists = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {(() => {
-                      console.log('\n=== RENDERING QUESTIONS ===');
-                      console.log('Total questions:', selectedList.questions.length);
-                      console.log('Questions details:', selectedList.questions.map((q, idx) => ({
-                        index: idx,
-                        _id: q._id,
-                        questionNumber: q.questionNumber,
-                        title: q.title,
-                        key: q._id || q.questionNumber
-                      })));
-                      console.log('==========================\n');
-                      return null;
-                    })()}
                     {selectedList.questions.map((question, index) => (
                       <div
                         key={question._id || question.questionNumber}

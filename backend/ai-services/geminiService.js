@@ -162,41 +162,54 @@ Provide a JSON response:
 
   buildRecommendationsPrompt(aiProfile, submissions, count) {
     const weakTopics = aiProfile.profile.weakTopics;
+    const recentSubmissions = submissions.submissions.slice(0, 20);
+    
+    // Count how many times each weak topic appears in recent submissions
+    const topicFrequency = {};
+    weakTopics.forEach(topic => {
+      topicFrequency[topic] = recentSubmissions.filter(sub => 
+        sub.topics.some(t => t.toLowerCase().includes(topic.toLowerCase()))
+      ).length;
+    });
     
     return `
-You are a LeetCode problem recommender. Based on the user's weak topics, recommend ${count} ACTUAL LeetCode problems.
+You are an expert LeetCode coach. Recommend ${count} REAL LeetCode problems that exist on leetcode.com.
 
-## User's Weak Topics (Need Practice):
+## User's Weak Topics (Need More Practice):
 ${weakTopics.map((topic, i) => {
-  const topicData = aiProfile.profile.topicAccuracy.find(t => t.topic === topic);
-  return `${i + 1}. ${topic}: Only ${topicData?.solved || 0} problems solved`;
+  return `${i + 1}. ${topic}: Solved ${topicFrequency[topic] || 0} problems in last 20 submissions`;
 }).join('\n')}
 
-## Recently Solved (Don't recommend these):
-${submissions.submissions.slice(0, 10).map(sub => sub.titleSlug).join(', ')}
+## Recently Solved Problems (Last 20 - DON'T recommend these):
+${recentSubmissions.map(sub => sub.titleSlug).join(', ')}
 
-Recommend ${count} REAL LeetCode problems that:
-1. Focus on the weak topics: ${weakTopics.join(', ')}
-2. Start with Easy/Medium difficulty
-3. Are foundational problems for these topics
-4. Use actual LeetCode problem titles (e.g., "Two Sum", "Reverse Linked List")
+CRITICAL INSTRUCTIONS:
+1. Recommend ONLY real LeetCode problems that currently exist on leetcode.com
+2. Focus on the weak topics: ${weakTopics.join(', ')}
+3. Start with Easy/Medium difficulty for weak topics
+4. Choose popular, well-known problems (like "Two Sum", "Reverse Linked List", "Valid Parentheses")
+5. Verify the problem slug format is correct (lowercase with hyphens)
 
-Provide JSON response with REAL problem names:
+Provide a JSON response:
 {
   "recommendations": [
     {
-      "title": "Actual LeetCode Problem Title",
-      "titleSlug": "actual-leetcode-slug",
-      "difficulty": "Easy/Medium/Hard",
-      "topics": ["Topic1", "Topic2"],
-      "reason": "Why this helps with weak topic",
-      "leetcodeUrl": "https://leetcode.com/problems/slug/",
-      "estimatedTime": "20-30 mins"
+      "title": "Two Sum",
+      "titleSlug": "two-sum",
+      "difficulty": "Easy",
+      "topics": ["Array", "Hash Table"],
+      "reason": "Master the fundamentals of Hash Table - one of your weak areas",
+      "leetcodeUrl": "https://leetcode.com/problems/two-sum/",
+      "estimatedTime": "15 mins"
     }
   ]
 }
 
-IMPORTANT: Use only real LeetCode problem names that exist on leetcode.com.
+IMPORTANT: 
+- Use EXACT problem titles from leetcode.com (check your knowledge of popular problems)
+- The titleSlug MUST match the actual LeetCode URL
+- Include the full leetcodeUrl with correct slug
+- Only recommend problems you are CERTAIN exist on LeetCode
 `;
   }
 

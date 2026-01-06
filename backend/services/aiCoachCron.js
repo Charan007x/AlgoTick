@@ -122,6 +122,7 @@ async function refreshUserData(userId) {
     } else {
       await AICoachCache.create({
         userId,
+        leetcodeUsername: aiProfile.leetcodeUsername,
         strongTopics: aiProfile.profile.strongTopics,
         weakTopics: aiProfile.profile.weakTopics,
         recommendations: recommendations.data?.recommendations || recommendations.fallback?.recommendations || [],

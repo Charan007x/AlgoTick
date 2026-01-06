@@ -1,4 +1,5 @@
 const geminiService = require('./geminiService');
+const { LEETCODE_PROBLEMS_BY_TOPIC } = require('../data/leetcodeProblems');
 
 class AICoachService {
   /**
@@ -201,77 +202,54 @@ class AICoachService {
   }
 
   getFallbackRecommendations(aiProfile) {
-    const weakTopic = aiProfile.profile.weakTopics[0];
-    const weakTopic2 = aiProfile.profile.weakTopics[1];
-    
-    // Hardcoded real LeetCode problems for weak topics
-    const problemsByTopic = {
-      'Linked List': [
-        { title: 'Reverse Linked List', slug: 'reverse-linked-list', difficulty: 'Easy' },
-        { title: 'Merge Two Sorted Lists', slug: 'merge-two-sorted-lists', difficulty: 'Easy' },
-        { title: 'Remove Nth Node From End of List', slug: 'remove-nth-node-from-end-of-list', difficulty: 'Medium' }
-      ],
-      'Tree': [
-        { title: 'Maximum Depth of Binary Tree', slug: 'maximum-depth-of-binary-tree', difficulty: 'Easy' },
-        { title: 'Invert Binary Tree', slug: 'invert-binary-tree', difficulty: 'Easy' },
-        { title: 'Binary Tree Level Order Traversal', slug: 'binary-tree-level-order-traversal', difficulty: 'Medium' }
-      ],
-      'Dynamic Programming': [
-        { title: 'Climbing Stairs', slug: 'climbing-stairs', difficulty: 'Easy' },
-        { title: 'House Robber', slug: 'house-robber', difficulty: 'Medium' },
-        { title: 'Coin Change', slug: 'coin-change', difficulty: 'Medium' }
-      ],
-      'Graph': [
-        { title: 'Number of Islands', slug: 'number-of-islands', difficulty: 'Medium' },
-        { title: 'Clone Graph', slug: 'clone-graph', difficulty: 'Medium' },
-        { title: 'Course Schedule', slug: 'course-schedule', difficulty: 'Medium' }
-      ],
-      'Binary Search': [
-        { title: 'Binary Search', slug: 'binary-search', difficulty: 'Easy' },
-        { title: 'Search Insert Position', slug: 'search-insert-position', difficulty: 'Easy' },
-        { title: 'Find First and Last Position of Element in Sorted Array', slug: 'find-first-and-last-position-of-element-in-sorted-array', difficulty: 'Medium' }
-      ]
-    };
-    
-    const weakTopicProblems = problemsByTopic[weakTopic] || [
-      { title: `${weakTopic} Practice Problem 1`, slug: 'practice-1', difficulty: 'Easy' },
-      { title: `${weakTopic} Practice Problem 2`, slug: 'practice-2', difficulty: 'Medium' }
-    ];
-    
-    const weakTopic2Problems = problemsByTopic[weakTopic2] || [];
-    
+    const weakTopics = aiProfile.profile.weakTopics;
     const recommendations = [];
+    const addedSlugs = new Set();
     
-    // Add 2-3 problems from first weak topic
-    weakTopicProblems.slice(0, 3).forEach(prob => {
-      recommendations.push({
-        title: prob.title,
-        titleSlug: prob.slug,
-        difficulty: prob.difficulty,
-        topics: [weakTopic],
-        reason: `Build foundation in ${weakTopic}`,
-        leetcodeUrl: `https://leetcode.com/problems/${prob.slug}/`,
-        estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : '30-45 mins'
+    // Get problems from each weak topic
+    weakTopics.forEach(topic => {
+      const problems = LEETCODE_PROBLEMS_BY_TOPIC[topic] || [];
+      
+      // Add up to 2 problems per weak topic
+      problems.slice(0, 2).forEach(problem => {
+        if (!addedSlugs.has(problem.slug) && recommendations.length < 5) {
+          recommendations.push({
+            title: problem.title,
+            titleSlug: problem.slug,
+            difficulty: problem.difficulty,
+            topics: problem.topics,
+            reason: `Practice ${topic} - one of your weak areas`,
+            leetcodeUrl: `https://leetcode.com/problems/${problem.slug}/`,
+            estimatedTime: problem.time
+          });
+          addedSlugs.add(problem.slug);
+        }
       });
     });
     
-    // Add 1-2 problems from second weak topic
-    if (weakTopic2Problems.length > 0) {
-      weakTopic2Problems.slice(0, 2).forEach(prob => {
-        recommendations.push({
-          title: prob.title,
-          titleSlug: prob.slug,
-          difficulty: prob.difficulty,
-          topics: [weakTopic2],
-          reason: `Strengthen ${weakTopic2} skills`,
-          leetcodeUrl: `https://leetcode.com/problems/${prob.slug}/`,
-          estimatedTime: prob.difficulty === 'Easy' ? '20-30 mins' : '30-45 mins'
-        });
+    // If we don't have 5 yet, add more from the first weak topic
+    if (recommendations.length < 5 && weakTopics.length > 0) {
+      const firstTopic = weakTopics[0];
+      const problems = LEETCODE_PROBLEMS_BY_TOPIC[firstTopic] || [];
+      
+      problems.forEach(problem => {
+        if (!addedSlugs.has(problem.slug) && recommendations.length < 5) {
+          recommendations.push({
+            title: problem.title,
+            titleSlug: problem.slug,
+            difficulty: problem.difficulty,
+            topics: problem.topics,
+            reason: `Build ${firstTopic} fundamentals`,
+            leetcodeUrl: `https://leetcode.com/problems/${problem.slug}/`,
+            estimatedTime: problem.time
+          });
+          addedSlugs.add(problem.slug);
+        }
       });
     }
     
     return {
-      recommendations: recommendations.slice(0, 5)
+      recommendations: recommendations
     };
   }
 }

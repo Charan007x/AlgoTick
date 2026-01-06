@@ -91,10 +91,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-black">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-28">
         {/* Stats Section */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 h-32 animate-pulse">
                 <div className="h-4 bg-white/10 rounded w-1/2 mb-4"></div>
@@ -103,7 +103,7 @@ const Dashboard = () => {
             ))}
           </div>
         ) : stats ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <StatsCard
               title="Due Today"
               value={stats.dueToday}

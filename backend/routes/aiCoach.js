@@ -79,11 +79,13 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       cache.weakTopics = aiProfile.profile.weakTopics;
       cache.recommendations = recommendations.data?.recommendations || recommendations.fallback?.recommendations || [];
       cache.lastRefreshed = new Date();
+      cache.leetcodeUsername = aiProfile.leetcodeUsername;
       await cache.save();
       console.log('💾 Cache updated');
     } else {
       cache = await AICoachCache.create({
         userId,
+        leetcodeUsername: aiProfile.leetcodeUsername,
         strongTopics: aiProfile.profile.strongTopics,
         weakTopics: aiProfile.profile.weakTopics,
         recommendations: recommendations.data?.recommendations || recommendations.fallback?.recommendations || [],
@@ -180,11 +182,13 @@ router.post('/refresh', authMiddleware, async (req, res) => {
       cache.weakTopics = newData.weakTopics;
       cache.recommendations = newData.recommendations;
       cache.lastRefreshed = newData.lastRefreshed;
+      cache.leetcodeUsername = aiProfile.leetcodeUsername;
       await cache.save();
       console.log('✅ Updated cache with fresh Gemini data');
     } else {
       cache = await AICoachCache.create({
         userId,
+        leetcodeUsername: aiProfile.leetcodeUsername,
         ...newData,
         cooldownHours: 0 // Change to 6 for production
       });
@@ -334,14 +338,27 @@ router.get('/performance', authMiddleware, async (req, res) => {
 
 async function getAIProfile(userId) {
   try {
-    // Try to get existing AI profile
-    let aiProfile = await AIProfile.findOne({ userId });
+    // Get user's current LeetCode username
+    const User = require('../models/User');
+    const user = await User.findById(userId);
     
-    if (aiProfile) {
-      return aiProfile;
+    if (!user || !user.leetcodeUsername) {
+      console.log('⚠️ User has no LeetCode username set');
+      return {
+        userId,
+        profile: {
+          totalProblems: 0,
+          currentStreak: 0,
+          lastSolved: null,
+          strongTopics: ['Array', 'String'],
+          weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
+        }
+      };
     }
     
-    // If no profile exists, analyze submissions and create one
+    const currentUsername = user.leetcodeUsername;
+    
+    // Get LeetCode submissions first
     const leetcodeData = await LeetCodeSubmission.findOne({ userId });
     
     if (!leetcodeData || !leetcodeData.submissions || leetcodeData.submissions.length === 0) {
@@ -356,6 +373,40 @@ async function getAIProfile(userId) {
           weakTopics: ['Dynamic Programming', 'Graph', 'Tree']
         }
       };
+    }
+    
+    // Check if AI profile exists and matches the current username
+    let aiProfile = await AIProfile.findOne({ userId });
+    
+    // If username changed, delete old profile and force regeneration
+    if (aiProfile && aiProfile.leetcodeUsername !== currentUsername) {
+      console.log(`🔄 Username changed from ${aiProfile.leetcodeUsername} to ${currentUsername}, regenerating profile...`);
+      await AIProfile.deleteOne({ userId });
+      await AICoachCache.deleteOne({ userId });
+      aiProfile = null;
+    }
+    // If LeetCode submissions username doesn't match current username, force refresh
+    else if (leetcodeData.leetcodeUsername !== currentUsername) {
+      console.log(`🔄 Submissions username (${leetcodeData.leetcodeUsername}) doesn't match current (${currentUsername}), will use current data`);
+      // Don't return cached profile, let it regenerate below
+      if (aiProfile) {
+        await AIProfile.deleteOne({ userId });
+        await AICoachCache.deleteOne({ userId });
+        aiProfile = null;
+      }
+    }
+    // If profile exists and LeetCode data was updated recently, regenerate the profile
+    else if (aiProfile && leetcodeData.lastFetched && aiProfile.updatedAt) {
+      const shouldRegenerate = new Date(leetcodeData.lastFetched) > new Date(aiProfile.updatedAt);
+      if (shouldRegenerate) {
+        console.log('🔄 LeetCode data is newer, regenerating AI profile...');
+        await AIProfile.deleteOne({ userId });
+        aiProfile = null;
+      } else {
+        return aiProfile;
+      }
+    } else if (aiProfile) {
+      return aiProfile;
     }
     
     // Analyze last 20 submissions to determine strong/weak topics
@@ -386,6 +437,7 @@ async function getAIProfile(userId) {
     // Create and save new AI profile
     aiProfile = await AIProfile.create({
       userId,
+      leetcodeUsername: currentUsername,
       profile: {
         totalProblems: recentSubmissions.length,
         currentStreak: 1,

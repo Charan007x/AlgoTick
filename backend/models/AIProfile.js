@@ -7,6 +7,10 @@ const aiProfileSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  leetcodeUsername: {
+    type: String,
+    required: true
+  },
   profile: {
     totalProblems: {
       type: Number,

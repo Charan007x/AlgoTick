@@ -67,4 +67,25 @@ export const listsAPI = {
   addAllToToday: (id) => api.post(`/lists/${id}/add-all-to-today`),
 };
 
+// Notes API
+export const notesAPI = {
+  getNotes: () => api.get('/notes'),
+  getNote: (id) => api.get(`/notes/${id}`),
+  createNote: (formData) => {
+    return api.post('/notes', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  updateNote: (id, formData) => {
+    return api.put(`/notes/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  deleteNote: (id) => api.delete(`/notes/${id}`),
+};
+
 export default api;

@@ -7,6 +7,10 @@ const leetCodeSubmissionSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  leetcodeUsername: {
+    type: String,
+    required: true
+  },
   lastFetched: {
     type: Date,
     default: Date.now

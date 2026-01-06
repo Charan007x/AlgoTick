@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import CustomLists from './pages/CustomLists';
+import Notes from './pages/Notes';
 import Settings from './components/Settings';
 import OAuthCallback from './pages/OAuthCallback';
 import TestAuth from './pages/TestAuth';
@@ -36,6 +37,14 @@ function App() {
             element={
               <PrivateRoute>
                 <CustomLists />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/notes"
+            element={
+              <PrivateRoute>
+                <Notes />
               </PrivateRoute>
             }
           />

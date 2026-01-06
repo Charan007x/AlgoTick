@@ -7,6 +7,10 @@ const aiCoachCacheSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  leetcodeUsername: {
+    type: String,
+    required: false // Optional for backward compatibility
+  },
   lastRefreshed: {
     type: Date,
     default: Date.now
