@@ -53,8 +53,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: 'Infinity' }));
+app.use(express.urlencoded({ extended: true, limit: 'Infinity' }));
 app.use(cookieParser());
 
 // Session configuration (required for Passport)
