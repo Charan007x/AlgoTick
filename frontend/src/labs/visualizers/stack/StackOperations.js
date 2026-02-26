@@ -6,7 +6,7 @@ export function StackOperations({ operations }) {
   return (
     <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
       <h3 className="text-white font-semibold mb-4">Operation History</h3>
-      <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+      <div className="space-y-2 max-h-[80px] overflow-y-auto custom-scrollbar">
         {operations.map((op) => (
           <div
             key={op.timestamp}

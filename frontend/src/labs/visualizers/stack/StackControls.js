@@ -14,7 +14,6 @@ export function StackControls({ onPush, onPop, onClear, isAnimating, isFull, isE
   return (
     <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">📚</span>
         <h3 className="text-white font-semibold text-lg">Stack Controls</h3>
       </div>
       <div className="space-y-4">
@@ -33,7 +32,7 @@ export function StackControls({ onPush, onPop, onClear, isAnimating, isFull, isE
             placeholder="Enter value"
             onKeyDown={(e) => e.key === 'Enter' && !isFull && handlePush()}
             disabled={isAnimating || isFull}
-            className="flex-1 px-4 py-3 bg-gray-900/80 border border-gray-600/50 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#61dca3] focus:ring-2 focus:ring-[#61dca3]/20 transition-all"
+            className="flex-1 px-4 py-3 bg-gray-900/80 border border-gray-600/50 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#61dca3] focus:ring-2 focus:ring-[#61dca3]/20 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <button
             onClick={handlePush}

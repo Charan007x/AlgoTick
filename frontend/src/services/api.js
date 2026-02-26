@@ -52,6 +52,7 @@ export const questionsAPI = {
   markRevised: (id) => api.put(`/questions/${id}/revise`),
   deleteQuestion: (id) => api.delete(`/questions/${id}`),
   getDashboardStats: (params) => api.get('/questions/stats/dashboard', { params }),
+  getLeetCodeActivity: () => api.get('/questions/leetcode-activity'),
 };
 
 // Lists API
@@ -86,6 +87,29 @@ export const notesAPI = {
     });
   },
   deleteNote: (id) => api.delete(`/notes/${id}`),
+};
+
+// AI Coach API
+export const aiCoachAPI = {
+  getDashboard: () => api.get('/ai-coach/dashboard'),
+  refresh: () => api.post('/ai-coach/refresh'),
+};
+
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markAsRead: (id) => api.put(`/notifications/${id}/read`),
+  markAsUnread: (id) => api.put(`/notifications/${id}/unread`),
+  markAllAsRead: () => api.put('/notifications/mark-all-read'),
+  deleteNotification: (id) => api.delete(`/notifications/${id}`),
+  deleteAll: () => api.delete('/notifications'),
+  
+  // Admin routes
+  createNotification: (data) => api.post('/notifications/admin/create', data),
+  getAllNotifications: () => api.get('/notifications/admin/all'),
+  deleteNotificationPermanently: (id) => api.delete(`/notifications/admin/${id}`),
+  getUsers: () => api.get('/notifications/admin/users'),
 };
 
 export default api;

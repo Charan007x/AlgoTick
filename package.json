@@ -8,13 +8,16 @@
     "frontend"
   ],
   "scripts": {
-    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../landing && npm install",
     "dev": "concurrently \"npm run dev:landing\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:landing": "cd landing && npm run dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && set BROWSER=none && npm start",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start"
+    "start:frontend": "cd frontend && npm start",
+    "build:all": "cd frontend && npm run build && cd ../landing && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:landing": "cd landing && npm run build"
   },
   "keywords": [
     "leetcode",

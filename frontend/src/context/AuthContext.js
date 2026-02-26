@@ -18,11 +18,19 @@ export const AuthProvider = ({ children }) => {
           console.log('AuthContext - Fetching user data...');
           const response = await authAPI.getCurrentUser();
           console.log('AuthContext - User authenticated:', response.data.user.username);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
           setUser(response.data.user);
           setToken(currentToken);
         } catch (error) {
           console.error('AuthContext - Auth check failed:', error.response?.status, error.response?.data);
+          
+          // If user is blocked, clear auth and show message
+          if (error.response?.status === 403 && error.response?.data?.message?.includes('blocked')) {
+            console.log('AuthContext - User account is blocked');
+          }
+          
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
           setToken(null);
           setUser(null);
         }
@@ -53,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('💾 Storing token and user data');
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userData));
       setToken(newToken);
       setUser(userData);
       
@@ -85,6 +94,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('💾 Storing token and user data');
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
       
@@ -101,6 +111,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
   };

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export function QueueDisplay({ queue, highlightedIndex }) {
   return (
@@ -16,31 +15,24 @@ export function QueueDisplay({ queue, highlightedIndex }) {
         )}
 
         {/* Queue Container */}
-        <div className="min-h-[200px] bg-gray-800/50 rounded-xl p-6 border-2 border-[#61dca3]/50">
+        <div className="h-[200px] bg-gray-800/50 rounded-xl p-6 border-2 border-[#61dca3]/50 flex items-center justify-center">
           {queue.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-white/40">
+            <div className="text-white/40">
               Queue is empty
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              <AnimatePresence mode="popLayout">
-                {queue.map((node, index) => (
-                  <motion.div
-                    key={node.id}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ 
-                      scale: 1, 
-                      opacity: 1,
-                      backgroundColor: highlightedIndex === index ? '#61dca3' : 'rgba(255, 255, 255, 0.1)'
-                    }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex-shrink-0 w-20 h-20 rounded-lg flex items-center justify-center text-2xl font-bold text-white border-2 border-white/20"
-                  >
-                    {node.value}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+            <div className="flex gap-3 items-center">
+              {queue.map((node, index) => (
+                <div
+                  key={node.id}
+                  style={{
+                    backgroundColor: highlightedIndex === index ? '#61dca3' : 'rgba(255, 255, 255, 0.1)'
+                  }}
+                  className="flex-shrink-0 w-16 h-16 rounded-lg flex items-center justify-center text-xl font-bold text-white border-2 border-white/20"
+                >
+                  {node.value}
+                </div>
+              ))}
             </div>
           )}
         </div>

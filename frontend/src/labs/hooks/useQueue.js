@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export function useQueue(maxSize = 8) {
+export function useQueue(maxSize = 6) {
   const [queue, setQueue] = useState([]);
   const [operations, setOperations] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);

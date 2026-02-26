@@ -14,7 +14,7 @@ const Navbar = () => {
 
   const handleLogoClick = () => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/home');
     } else {
       navigate('/');
     }

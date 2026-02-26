@@ -1,45 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const Note = require('../models/Note');
 const authMiddleware = require('../middleware/auth');
 
 // All routes require authentication
 router.use(authMiddleware);
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads/notes');
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename: userId_timestamp_originalname
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, req.user.id + '_' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const fileFilter = (req, file, cb) => {
-  // Only allow PDF files
-  if (file.mimetype === 'application/pdf') {
-    cb(null, true);
-  } else {
-    cb(new Error('Only PDF files are allowed'), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter
-  // No file size limits
-});
 
 // @route   GET /api/notes
 // @desc    Get all notes for logged-in user
@@ -78,7 +43,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/notes
 // @desc    Create a new note
 // @access  Private
-router.post('/', upload.single('pdf'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { name, link } = req.body;
     
@@ -91,12 +56,6 @@ router.post('/', upload.single('pdf'), async (req, res) => {
       name: name.trim(),
       link: link || null
     };
-    
-    // If a PDF was uploaded
-    if (req.file) {
-      noteData.pdfUrl = `/uploads/notes/${req.file.filename}`;
-      noteData.pdfFileName = req.file.originalname;
-    }
     
     const newNote = new Note(noteData);
     await newNote.save();
@@ -114,9 +73,9 @@ router.post('/', upload.single('pdf'), async (req, res) => {
 // @route   PUT /api/notes/:id
 // @desc    Update a note
 // @access  Private
-router.put('/:id', upload.single('pdf'), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
-    const { name, link, removePdf } = req.body;
+    const { name, link } = req.body;
     
     const note = await Note.findOne({ 
       _id: req.params.id, 
@@ -134,30 +93,6 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
     
     if (link !== undefined) {
       note.link = link || null;
-    }
-    
-    // Handle PDF removal
-    if (removePdf === 'true' && note.pdfUrl) {
-      const filePath = path.join(__dirname, '..', note.pdfUrl);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-      note.pdfUrl = null;
-      note.pdfFileName = null;
-    }
-    
-    // Handle new PDF upload
-    if (req.file) {
-      // Delete old PDF if exists
-      if (note.pdfUrl) {
-        const oldFilePath = path.join(__dirname, '..', note.pdfUrl);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
-        }
-      }
-      
-      note.pdfUrl = `/uploads/notes/${req.file.filename}`;
-      note.pdfFileName = req.file.originalname;
     }
     
     await note.save();
@@ -184,14 +119,6 @@ router.delete('/:id', async (req, res) => {
     
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
-    }
-    
-    // Delete associated PDF file if exists
-    if (note.pdfUrl) {
-      const filePath = path.join(__dirname, '..', note.pdfUrl);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
     }
     
     await Note.deleteOne({ _id: req.params.id });

@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const passport = require('../config/passport');
+const { syncAllUsersLeetCodeData, syncSpecificUser } = require('../services/leetcodeSyncCron');
+const authMiddleware = require('../middleware/auth');
 
 // @route   POST /api/auth/signup
 // @desc    Register a new user
@@ -63,7 +65,11 @@ router.post('/signup', async (req, res) => {
       user: {
         id: newUser._id,
         username: newUser.username,
-        email: newUser.email
+        email: newUser.email,
+        displayName: newUser.displayName,
+        avatar: newUser.avatar,
+        leetcodeUsername: newUser.leetcodeUsername,
+        role: newUser.role || 'user'
       }
     });
   } catch (error) {
@@ -79,6 +85,8 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    console.log('[Login] Attempt for email:', email);
+    
     // Validation
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
@@ -87,11 +95,16 @@ router.post('/login', async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('[Login] User not found:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
     
+    console.log('[Login] User found:', user.username);
+    
     // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('[Login] Password match:', isMatch);
+    
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -103,13 +116,19 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
     
+    console.log('[Login] Success for user:', user.username);
+    
     res.json({
       message: 'Login successful',
       token,
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        displayName: user.displayName,
+        avatar: user.avatar,
+        leetcodeUsername: user.leetcodeUsername,
+        role: user.role || 'user'
       }
     });
   } catch (error) {
@@ -215,5 +234,160 @@ router.get('/google/callback',
     }
   }
 );
+
+// @route   PUT /api/auth/profile
+// @desc    Update user profile
+// @access  Private
+router.put('/profile', async (req, res) => {
+  try {
+    const { displayName, email } = req.body;
+    const userId = req.user.id;
+
+    // Validate input
+    if (!displayName || !displayName.trim()) {
+      return res.status(400).json({ message: 'Display name is required' });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== req.user.email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { 
+        displayName: displayName.trim(),
+        ...(email && { email })
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        displayName: updatedUser.displayName,
+        avatar: updatedUser.avatar,
+        leetcodeUsername: updatedUser.leetcodeUsername
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
+  }
+});
+
+// @route   PUT /api/auth/password
+// @desc    Change user password
+// @access  Private
+router.put('/password', async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide current and new password' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    // Get user with password
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if user is OAuth user (no password)
+    if (!user.password) {
+      return res.status(400).json({ message: 'Cannot change password for OAuth accounts' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Password change error:', error);
+    res.status(500).json({ message: 'Failed to change password' });
+  }
+});
+
+// @route   POST /api/auth/sync-leetcode
+// @desc    Manually trigger LeetCode data sync for current user
+// @access  Private
+router.post('/sync-leetcode', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user.id;
+    
+    console.log(`[Manual Sync] Triggering sync for user: ${userId}`);
+    
+    const success = await syncSpecificUser(userId);
+    
+    if (success) {
+      res.json({ 
+        success: true,
+        message: 'LeetCode data synced successfully' 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to sync LeetCode data. Make sure you have a LeetCode username set.' 
+      });
+    }
+  } catch (error) {
+    console.error('Manual sync error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to sync LeetCode data',
+      error: error.message 
+    });
+  }
+});
+
+// @route   POST /api/auth/sync-all-users (Admin only - for testing)
+// @desc    Manually trigger LeetCode data sync for all users
+// @access  Private
+router.post('/sync-all-users', authMiddleware, async (req, res) => {
+  try {
+    console.log(`[Manual Sync] Triggering sync for all users`);
+    
+    // Run sync in background
+    syncAllUsersLeetCodeData().then(result => {
+      console.log('[Manual Sync] Completed:', result);
+    });
+    
+    res.json({ 
+      success: true,
+      message: 'LeetCode data sync started for all users. This will run in the background.' 
+    });
+  } catch (error) {
+    console.error('Manual sync all error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to start sync',
+      error: error.message 
+    });
+  }
+});
 
 module.exports = router;

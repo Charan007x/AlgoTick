@@ -37,12 +37,31 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  displayName: {
+    type: String,
+    trim: true,
+    default: null
+  },
   leetcodeUsername: {
     type: String,
     trim: true,
     default: null
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  status: {
+    type: String,
+    enum: ['active', 'blocked'],
+    default: 'active'
+  },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }

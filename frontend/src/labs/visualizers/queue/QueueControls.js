@@ -20,7 +20,6 @@ export function QueueControls({ onEnqueue, onDequeue, onClear, isAnimating, isFu
   return (
     <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 shadow-xl">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">🚶</span>
         <h3 className="text-white font-semibold text-lg">Queue Controls</h3>
       </div>
       
@@ -40,7 +39,7 @@ export function QueueControls({ onEnqueue, onDequeue, onClear, isAnimating, isFu
             onKeyPress={handleKeyPress}
             placeholder="Enter value"
             disabled={isAnimating || isFull}
-            className="w-full px-4 py-3 bg-gray-900/80 border border-gray-600/50 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#61dca3] focus:ring-2 focus:ring-[#61dca3]/20 transition-all disabled:opacity-50"
+            className="w-full px-4 py-3 bg-gray-900/80 border border-gray-600/50 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#61dca3] focus:ring-2 focus:ring-[#61dca3]/20 transition-all disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
 

@@ -1,11 +1,12 @@
 const axios = require('axios');
+const { LeetCodeProblemCache, LeetCodeUserStatsCache } = require('../models/LeetCodeCache');
 
 /**
- * Fetch problem details from LeetCode GraphQL API
+ * Fetch problem details from LeetCode API (internal function)
  * @param {string} titleSlug - The URL slug of the problem (e.g., "two-sum")
  * @returns {object} Problem details including title, difficulty, tags
  */
-async function fetchLeetCodeProblem(titleSlug) {
+async function fetchLeetCodeProblemFromAPI(titleSlug) {
   try {
     const graphqlQuery = {
       query: `
@@ -48,6 +49,56 @@ async function fetchLeetCodeProblem(titleSlug) {
   } catch (error) {
     console.error('LeetCode API error:', error.message);
     throw new Error('Failed to fetch question from LeetCode');
+  }
+}
+
+/**
+ * Fetch problem details from database first, fallback to API
+ * @param {string} titleSlug - The URL slug of the problem (e.g., "two-sum")
+ * @returns {object} Problem details including title, difficulty, tags
+ */
+async function fetchLeetCodeProblem(titleSlug) {
+  try {
+    // First, check if problem exists in cache
+    let cachedProblem = await LeetCodeProblemCache.findOne({ titleSlug });
+    
+    if (cachedProblem) {
+      console.log(`✅ Problem found in cache: ${titleSlug}`);
+      return {
+        questionId: cachedProblem.questionId,
+        title: cachedProblem.title,
+        titleSlug: cachedProblem.titleSlug,
+        difficulty: cachedProblem.difficulty,
+        tags: cachedProblem.tags,
+        url: cachedProblem.url
+      };
+    }
+
+    // If not in cache, fetch from API
+    console.log(`⚠️ Problem not in cache, fetching from API: ${titleSlug}`);
+    const problemData = await fetchLeetCodeProblemFromAPI(titleSlug);
+
+    // Store in cache for future use
+    try {
+      await LeetCodeProblemCache.create({
+        questionId: problemData.questionId,
+        title: problemData.title,
+        titleSlug: problemData.titleSlug,
+        difficulty: problemData.difficulty,
+        tags: problemData.tags,
+        url: problemData.url,
+        lastFetched: new Date()
+      });
+      console.log(`💾 Problem cached: ${titleSlug}`);
+    } catch (cacheError) {
+      // If caching fails (e.g., duplicate), just log and continue
+      console.log(`⚠️ Failed to cache problem (may already exist): ${cacheError.message}`);
+    }
+
+    return problemData;
+  } catch (error) {
+    console.error('Error fetching LeetCode problem:', error.message);
+    throw error;
   }
 }
 
@@ -328,13 +379,13 @@ async function checkSubmissionAfterDate(leetcodeUsername, titleSlug, afterDate) 
 }
 
 /**
- * Get user's recent activity summary
+ * Get user's recent activity summary from LeetCode API (internal function)
  * @param {string} leetcodeUsername - LeetCode username
  * @returns {object} Activity summary
  */
-async function getUserActivitySummary(leetcodeUsername) {
+async function getUserActivitySummaryFromAPI(leetcodeUsername) {
   try {
-    console.log('Fetching LeetCode stats for username:', leetcodeUsername);
+    console.log('Fetching LeetCode stats from API for username:', leetcodeUsername);
     
     const graphqlQuery = {
       query: `
@@ -352,6 +403,11 @@ async function getUserActivitySummary(leetcodeUsername) {
               realName
               ranking
             }
+            userCalendar {
+              streak
+              totalActiveDays
+              submissionCalendar
+            }
           }
         }
       `,
@@ -366,11 +422,21 @@ async function getUserActivitySummary(leetcodeUsername) {
     });
 
     console.log('LeetCode API response status:', response.status);
-    console.log('LeetCode API response data:', JSON.stringify(response.data, null, 2));
 
     if (response.data && response.data.data && response.data.data.matchedUser) {
       const user = response.data.data.matchedUser;
       const stats = user.submitStats.acSubmissionNum;
+      const calendar = user.userCalendar;
+      
+      // Parse submission calendar (it's a JSON string)
+      let submissionCalendar = {};
+      if (calendar && calendar.submissionCalendar) {
+        try {
+          submissionCalendar = JSON.parse(calendar.submissionCalendar);
+        } catch (e) {
+          console.error('Error parsing submission calendar:', e);
+        }
+      }
       
       return {
         username: user.username,
@@ -379,18 +445,81 @@ async function getUserActivitySummary(leetcodeUsername) {
         totalSolved: stats.find(s => s.difficulty === 'All')?.count || 0,
         easySolved: stats.find(s => s.difficulty === 'Easy')?.count || 0,
         mediumSolved: stats.find(s => s.difficulty === 'Medium')?.count || 0,
-        hardSolved: stats.find(s => s.difficulty === 'Hard')?.count || 0
+        hardSolved: stats.find(s => s.difficulty === 'Hard')?.count || 0,
+        streak: calendar?.streak || 0,
+        totalActiveDays: calendar?.totalActiveDays || 0,
+        submissionCalendar: submissionCalendar
       };
     }
 
-    console.log('matchedUser not found in response. Full response:', JSON.stringify(response.data));
+    console.log('matchedUser not found in response.');
     throw new Error('User not found on LeetCode');
   } catch (error) {
-    console.error('Error fetching user activity:', error.message);
+    console.error('Error fetching user activity from API:', error.message);
     if (error.response) {
       console.error('LeetCode API error response:', error.response.status, error.response.data);
     }
     throw new Error(error.message || 'Failed to fetch user activity from LeetCode');
+  }
+}
+
+/**
+ * Get user's recent activity summary from database first, fallback to API
+ * @param {string} leetcodeUsername - LeetCode username
+ * @param {string} userId - User's database ID (optional, for better caching)
+ * @param {boolean} forceRefresh - Force fetch from API even if cache is valid
+ * @returns {object} Activity summary
+ */
+async function getUserActivitySummary(leetcodeUsername, userId = null, forceRefresh = false) {
+  try {
+    // Build query - prefer userId lookup if available
+    let query = userId 
+      ? { userId } 
+      : { leetcodeUsername };
+
+    // First, check if stats exist in cache
+    let cachedStats = await LeetCodeUserStatsCache.findOne(query);
+    
+    if (cachedStats && cachedStats.isValid() && !forceRefresh) {
+      console.log(`✅ User stats found in cache: ${leetcodeUsername}`);
+      return cachedStats.stats;
+    }
+
+    // If not in cache or cache is invalid, fetch from API
+    console.log(`⚠️ User stats not in cache or expired, fetching from API: ${leetcodeUsername}`);
+    const statsData = await getUserActivitySummaryFromAPI(leetcodeUsername);
+
+    // Store/update in cache for future use - use delete and create to ensure complete replacement
+    try {
+      // Delete old cache if exists to ensure complete replacement
+      if (userId) {
+        await LeetCodeUserStatsCache.deleteOne({ userId });
+      } else {
+        await LeetCodeUserStatsCache.deleteOne({ leetcodeUsername });
+      }
+      
+      // Create fresh cache entry
+      const cacheData = {
+        leetcodeUsername,
+        stats: statsData,
+        lastFetched: new Date()
+      };
+      
+      if (userId) {
+        cacheData.userId = userId;
+      }
+      
+      await LeetCodeUserStatsCache.create(cacheData);
+      console.log(`💾 User stats cache REPLACED: ${leetcodeUsername} (${statsData.totalSolved} solved)`);
+    } catch (cacheError) {
+      // If caching fails, just log and continue
+      console.log(`⚠️ Failed to cache user stats: ${cacheError.message}`);
+    }
+
+    return statsData;
+  } catch (error) {
+    console.error('Error fetching user activity summary:', error.message);
+    throw error;
   }
 }
 
@@ -402,5 +531,6 @@ module.exports = {
   getUserSubmissions,
   checkSubmissionOnDate,
   checkSubmissionAfterDate,
-  getUserActivitySummary
+  getUserActivitySummary,
+  getUserActivitySummaryFromAPI // Export for cron job use
 };

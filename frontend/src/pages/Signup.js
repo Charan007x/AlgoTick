@@ -50,7 +50,7 @@ const Signup = () => {
     const result = await signup(signupData);
     
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/home');
     } else {
       setError(result.message);
     }
@@ -66,7 +66,7 @@ const Signup = () => {
           <div className="w-12 h-12 bg-gradient-to-br from-[#61dca3] to-[#61b3dc] rounded-xl flex items-center justify-center">
             <span className="text-2xl font-bold text-black">✓</span>
           </div>
-          <span className="text-3xl font-bold text-white tracking-tight">AlgoTick</span>
+          <span className="text-3xl font-bold tracking-tight"><span className="text-white">Algo</span><span className="text-[#61dca3]">Tick</span></span>
         </div>
 
         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8 animate-scaleIn delay-100">

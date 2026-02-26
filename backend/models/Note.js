@@ -11,14 +11,6 @@ const noteSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  pdfUrl: {
-    type: String,
-    default: null
-  },
-  pdfFileName: {
-    type: String,
-    default: null
-  },
   link: {
     type: String,
     trim: true,

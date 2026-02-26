@@ -151,7 +151,7 @@ const Settings = () => {
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#61dca3] focus:border-transparent transition-all"
               />
               <p className="text-sm text-white/50 mt-2">
-                💡 Enter just your username (e.g., <code className="bg-white/10 px-2 py-0.5 rounded text-[#61dca3]">Charan007x</code>) or paste your profile URL
+                Enter just your username (e.g., <code className="bg-white/10 px-2 py-0.5 rounded text-[#61dca3]">Charan007x</code>) or paste your profile URL
               </p>
               <p className="text-xs text-white/40 mt-1">
                 Find it at: https://leetcode.com/u/<strong className="text-[#61dca3]">YOUR_USERNAME</strong>/

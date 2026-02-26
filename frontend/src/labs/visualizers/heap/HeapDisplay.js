@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 
 export function HeapDisplay({ heap, heapArray, heapType, highlightedNodes }) {
   if (!heap) {
@@ -76,12 +75,7 @@ export function HeapDisplay({ heap, heapArray, heapType, highlightedNodes }) {
     positions.forEach((pos, nodeId) => {
       const isHighlighted = highlightedNodes.includes(nodeId)
       nodes.push(
-        <motion.g
-          key={nodeId}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
+        <g key={nodeId}>
           <circle
             cx={pos.x}
             cy={pos.y}
@@ -103,7 +97,7 @@ export function HeapDisplay({ heap, heapArray, heapType, highlightedNodes }) {
           >
             {pos.value}
           </text>
-        </motion.g>
+        </g>
       )
     })
     return nodes

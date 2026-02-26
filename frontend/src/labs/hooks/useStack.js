@@ -2,7 +2,7 @@ import { useState } from "react"
 
 let nodeIdCounter = 0
 
-export function useStack(maxSize = 8) {
+export function useStack(maxSize = 6) {
   const [stack, setStack] = useState([])
   const [operations, setOperations] = useState([])
   const [isAnimating, setIsAnimating] = useState(false)

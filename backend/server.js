@@ -19,10 +19,13 @@ const questionRoutes = require('./routes/questions');
 const listRoutes = require('./routes/lists');
 const aiCoachRoutes = require('./routes/aiCoach');
 const notesRoutes = require('./routes/notes');
+const notificationRoutes = require('./routes/notifications');
+const adminRoutes = require('./routes/admin');
 
 // Import reminder service
 const { checkReminders } = require('./services/reminderService');
 const { initAICoachCron } = require('./services/aiCoachCron');
+const { initLeetCodeSyncCron } = require('./services/leetcodeSyncCron');
 
 const app = express();
 
@@ -76,7 +79,7 @@ app.use(passport.session());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/leetcode-tracker')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/algotick')
 .then(() => console.log('✅ MongoDB connected successfully'))
 .catch((err) => console.error('❌ MongoDB connection error:', err));
 
@@ -86,8 +89,14 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/ai-coach', aiCoachRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
-// Health check route
+// Health check routes (for external monitoring/keep-alive services)
+app.get('/health', (req, res) => {
+  res.status(200).send('ok');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -104,6 +113,9 @@ cron.schedule('0 8 * * *', () => {
 
 // Initialize AI Coach cron job (runs every day at 2 AM)
 initAICoachCron();
+
+// Initialize LeetCode data sync cron job (runs every 6 hours)
+initLeetCodeSyncCron();
 
 // Error handling middleware
 app.use((err, req, res, next) => {

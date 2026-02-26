@@ -305,13 +305,16 @@ router.get('/leetcode-activity', async (req, res) => {
       });
     }
     
-    console.log('Fetching LeetCode activity for user:', user.leetcodeUsername);
-    const activity = await getUserActivitySummary(user.leetcodeUsername);
+    // Check if force refresh is requested
+    const forceRefresh = req.query.refresh === 'true';
     
-    console.log('Successfully fetched activity:', activity);
+    console.log('Fetching LeetCode activity for user:', user.leetcodeUsername, 'Force refresh:', forceRefresh);
+    const activity = await getUserActivitySummary(user.leetcodeUsername, req.user.id, forceRefresh);
+    
     res.json({
       leetcodeUsername: user.leetcodeUsername,
-      activity
+      activity,
+      cached: !forceRefresh
     });
     
   } catch (error) {

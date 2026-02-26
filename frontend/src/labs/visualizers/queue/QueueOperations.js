@@ -7,7 +7,7 @@ export function QueueOperations({ operations }) {
     <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
       <h3 className="text-xl font-bold text-white mb-4">Operations History</h3>
       
-      <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+      <div className="space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar">
         {operations.map((op, index) => (
           <div
             key={index}

@@ -1,19 +1,29 @@
 /**
- * Landing page icon constants for consistent rendering across all platforms
- * Using Unicode code points to ensure cross-platform compatibility
+ * Landing page icon components for consistent rendering across all platforms
+ * Using Lucide React icons for clean, scalable SVG icons
  */
+
+import { 
+  Brain, 
+  Zap, 
+  CheckCircle, 
+  TrendingUp, 
+  Target, 
+  Lock,
+  Check
+} from 'lucide-react';
 
 export const LANDING_ICONS = {
   // Feature Icons
-  BRAIN: '\u{1F9E0}',        // 🧠 - Remember Forever
-  LIGHTNING: '\u26A1',        // ⚡ - Stop Wasting Time
-  CHECKMARK: '\u2705',        // ✅ - Honest Progress Tracking
-  CHART: '\u{1F4C8}',        // 📈 - Watch Your Growth
-  TARGET: '\u{1F3AF}',       // 🎯 - Stay Focused
-  LOCK: '\u{1F512}',         // 🔒 - Your Data, Your Control
+  BRAIN: Brain,           // Remember Forever
+  LIGHTNING: Zap,         // Stop Wasting Time
+  CHECKMARK: CheckCircle, // Honest Progress Tracking
+  CHART: TrendingUp,      // Watch Your Growth
+  TARGET: Target,         // Stay Focused
+  LOCK: Lock,             // Your Data, Your Control
   
   // Brand Icons
-  TICK: '\u2713',            // ✓ - AlgoTick logo mark
+  TICK: Check,            // AlgoTick logo mark
 };
 
 export default LANDING_ICONS;

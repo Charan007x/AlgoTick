@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 export function BinaryTreeDisplay({ tree, highlightedNodes }) {
@@ -79,17 +78,13 @@ export function BinaryTreeDisplay({ tree, highlightedNodes }) {
       const isHighlighted = highlightedNodes.includes(nodeId);
       nodes.push(
         <g key={nodeId}>
-          <motion.circle
+          <circle
             cx={pos.x}
             cy={pos.y}
             r="25"
             fill={isHighlighted ? '#3b82f6' : '#1f2937'}
             stroke={isHighlighted ? '#60a5fa' : '#4b5563'}
             strokeWidth="2"
-            animate={{
-              scale: isHighlighted ? 1.2 : 1,
-            }}
-            transition={{ duration: 0.3 }}
           />
           <text
             x={pos.x}
