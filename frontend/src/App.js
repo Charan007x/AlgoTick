@@ -6,6 +6,7 @@ import { ConfirmProvider } from './context/ConfirmContext';
 import Toast from './components/Toast';
 import ConfirmDialog from './components/ConfirmDialog';
 import PrivateRoute from './components/PrivateRoute';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
@@ -32,7 +33,7 @@ function App() {
           <ConfirmDialog />
           <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
