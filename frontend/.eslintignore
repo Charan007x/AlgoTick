@@ -1,0 +1,13 @@
+# Backup and old files
+*.old.js
+*_old.js
+
+# Build output
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/

@@ -7,7 +7,7 @@ import axios from 'axios';
 const Profile = () => {
   const navigate = useNavigate();
   const [hoveredNav, setHoveredNav] = useState(null);
-  // const [activeNav, setActiveNav] = useState('profile');
+  const activeNav = 'profile'; // Static value - never changes on this page
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
