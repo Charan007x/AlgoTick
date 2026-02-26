@@ -38,8 +38,8 @@ const OAuthCallback = () => {
           // Update auth context
           setToken(token);
           
-          // Navigate to dashboard
-          navigate('/dashboard', { replace: true });
+          // Navigate to new dashboard
+          navigate('/home', { replace: true });
         } catch (verifyError) {
           console.error('Token verification failed:', verifyError);
           localStorage.removeItem('token');
