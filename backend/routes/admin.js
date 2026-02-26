@@ -5,7 +5,8 @@ const Question = require('../models/Question');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 const { LeetCodeProblemCache, LeetCodeUserStatsCache } = require('../models/LeetCodeCache');
 const SyncLog = require('../models/SyncLog');
-const { syncAllUsersLeetCodeData, syncSpecificUser } = require('../services/leetcodeSyncCron');
+const { syncAllUsersLeetCodeData, syncSpecificUser, setCronJobStatus: setLeetcodeCronStatus, getCronJobStatus: getLeetcodeCronStatus } = require('../services/leetcodeSyncCron');
+const { setCronJobStatus: setAICoachCronStatus, getCronJobStatus: getAICoachCronStatus } = require('../services/aiCoachCron');
 const authMiddleware = require('../middleware/auth');
 const { isAdmin } = require('../middleware/auth');
 
@@ -485,6 +486,49 @@ router.delete('/users/:userId', authMiddleware, isAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error deleting user:', error);
     res.status(500).json({ message: 'Failed to delete user' });
+  }
+});
+
+// Get cron job status
+router.get('/cron-status', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    res.json({
+      leetcodeSync: getLeetcodeCronStatus(),
+      aiCoach: getAICoachCronStatus()
+    });
+  } catch (error) {
+    console.error('Error getting cron status:', error);
+    res.status(500).json({ message: 'Failed to get cron status' });
+  }
+});
+
+// Toggle LeetCode sync cron job
+router.post('/cron/leetcode-sync/toggle', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    setLeetcodeCronStatus(enabled);
+    res.json({ 
+      message: `LeetCode sync ${enabled ? 'enabled' : 'disabled'}`,
+      enabled 
+    });
+  } catch (error) {
+    console.error('Error toggling LeetCode sync:', error);
+    res.status(500).json({ message: 'Failed to toggle LeetCode sync' });
+  }
+});
+
+// Toggle AI Coach cron job
+router.post('/cron/ai-coach/toggle', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    setAICoachCronStatus(enabled);
+    res.json({ 
+      message: `AI Coach ${enabled ? 'enabled' : 'disabled'}`,
+      enabled 
+    });
+  } catch (error) {
+    console.error('Error toggling AI Coach:', error);
+    res.status(500).json({ message: 'Failed to toggle AI Coach' });
   }
 });
 

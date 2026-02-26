@@ -6,6 +6,10 @@ const SyncLog = require('../models/SyncLog');
 const { getUserActivitySummaryFromAPI } = require('./leetcodeService');
 const axios = require('axios');
 
+// Cron job state management
+let cronJobEnabled = true;
+let cronTask = null;
+
 /**
  * Fetch user's recent submissions from LeetCode API
  * @param {string} leetcodeUsername - LeetCode username
@@ -364,7 +368,11 @@ async function syncAllUsersLeetCodeData(progressCallback = null) {
 function initLeetCodeSyncCron() {
   // Schedule cron job to run daily at 2am
   // Pattern: '0 2 * * *' means at 2:00 AM every day
-  cron.schedule('0 2 * * *', async () => {
+  cronTask = cron.schedule('0 2 * * *', async () => {
+    if (!cronJobEnabled) {
+      console.log('[Cron] LeetCode sync skipped (disabled by admin)');
+      return;
+    }
     console.log('[Cron] LeetCode sync triggered (daily at 2am)');
     await syncAllUsersLeetCodeData();
   }, {
@@ -380,6 +388,23 @@ function initLeetCodeSyncCron() {
   //   console.log('[Cron] Starting initial LeetCode sync for all users...');
   //   syncAllUsersLeetCodeData();
   // }, 10000); // Run 10 seconds after startup
+}
+
+/**
+ * Enable or disable the LeetCode sync cron job
+ * @param {boolean} enabled - Whether to enable or disable the cron job
+ */
+function setCronJobStatus(enabled) {
+  cronJobEnabled = enabled;
+  console.log(`[Cron] LeetCode sync ${enabled ? 'enabled' : 'disabled'}`);
+}
+
+/**
+ * Get current cron job status
+ * @returns {boolean} Whether the cron job is enabled
+ */
+function getCronJobStatus() {
+  return cronJobEnabled;
 }
 
 /**
@@ -405,5 +430,7 @@ module.exports = {
   initLeetCodeSyncCron,
   syncAllUsersLeetCodeData,
   syncUserLeetCodeData,
-  syncSpecificUser
+  syncSpecificUser,
+  setCronJobStatus,
+  getCronJobStatus
 };

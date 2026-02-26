@@ -189,6 +189,24 @@ const Admin = () => {
     }
   };
 
+  const fetchCronStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/cron-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCronJobs(data);
+      }
+    } catch (error) {
+      console.error('Error fetching cron status:', error);
+    }
+  };
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     setUserData({
@@ -197,6 +215,7 @@ const Admin = () => {
     });
 
     fetchAdminStats();
+    fetchCronStatus();
     
     // Cleanup function
     return () => {
@@ -952,11 +971,47 @@ const Admin = () => {
   const renderCronJobs = () => {
     if (!stats) return null;
     
-    const toggleCronJob = (jobName) => {
-      setCronJobs(prev => ({
-        ...prev,
-        [jobName]: !prev[jobName]
-      }));
+    const toggleCronJob = async (jobName) => {
+      try {
+        const newStatus = !cronJobs[jobName];
+        
+        // Optimistically update UI
+        setCronJobs(prev => ({
+          ...prev,
+          [jobName]: newStatus
+        }));
+
+        // Call backend API
+        const token = localStorage.getItem('token');
+        const endpoint = jobName === 'leetcodeSync' 
+          ? '/api/admin/cron/leetcode-sync/toggle'
+          : '/api/admin/cron/ai-coach/toggle';
+        
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ enabled: newStatus })
+        });
+
+        if (!response.ok) {
+          // Revert on error
+          setCronJobs(prev => ({
+            ...prev,
+            [jobName]: !newStatus
+          }));
+          console.error('Failed to toggle cron job');
+        }
+      } catch (error) {
+        console.error('Error toggling cron job:', error);
+        // Revert on error
+        setCronJobs(prev => ({
+          ...prev,
+          [jobName]: !cronJobs[jobName]
+        }));
+      }
     };
     
     return (

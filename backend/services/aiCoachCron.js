@@ -4,6 +4,10 @@ const AICoachCache = require('../models/AICoachCache');
 const AIProfile = require('../models/AIProfile');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 
+// Cron job state management
+let cronJobEnabled = true;
+let cronTask = null;
+
 /**
  * Fetch AI profile for a user - same logic as routes
  */
@@ -169,7 +173,12 @@ async function refreshAllUsers() {
  */
 function initAICoachCron() {
   // Schedule cron job for 2am daily (0 2 * * *)
-  cron.schedule('0 2 * * *', async () => {
+  cronTask = cron.schedule('0 2 * * *', async () => {
+    if (!cronJobEnabled) {
+      console.log('[Cron] AI Coach refresh skipped (disabled by admin)');
+      return;
+    }
+    console.log('[Cron] AI Coach refresh triggered (daily at 2am)');
     await refreshAllUsers();
   }, {
     scheduled: true,
@@ -183,8 +192,27 @@ function initAICoachCron() {
   // refreshAllUsers();
 }
 
+/**
+ * Enable or disable the AI Coach cron job
+ * @param {boolean} enabled - Whether to enable or disable the cron job
+ */
+function setCronJobStatus(enabled) {
+  cronJobEnabled = enabled;
+  console.log(`[Cron] AI Coach ${enabled ? 'enabled' : 'disabled'}`);
+}
+
+/**
+ * Get current cron job status
+ * @returns {boolean} Whether the cron job is enabled
+ */
+function getCronJobStatus() {
+  return cronJobEnabled;
+}
+
 module.exports = {
   initAICoachCron,
   refreshAllUsers,
-  refreshUserData
+  refreshUserData,
+  setCronJobStatus,
+  getCronJobStatus
 };
