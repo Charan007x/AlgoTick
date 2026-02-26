@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, User, Home, BarChart3, Zap, Lightbulb, Trophy, Bot, TrendingUp, Link2, Target, List, FlaskConical, StickyNote, Settings, Bell, LogOut } from 'lucide-react';
+import { Search, User, Home, BarChart3, Zap, Bot, TrendingUp, Link2, Target, List, FlaskConical, StickyNote, Settings, Bell, LogOut } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Label, Sector, Cell } from 'recharts';
 import { questionsAPI, aiCoachAPI, notificationsAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,7 @@ const TestDashboard = () => {
   const [aiCoachData, setAiCoachData] = useState(null);
   const [userData, setUserData] = useState({ username: '', email: '' });
   const [topNotifications, setTopNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // const [unreadCount, setUnreadCount] = useState(0);
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
   
@@ -29,9 +29,9 @@ const TestDashboard = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+  // const closeMenu = () => {
+  //   setIsMenuOpen(false);
+  // };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -915,7 +915,7 @@ const TestDashboard = () => {
                           dataKey="problems" 
                           radius={[8, 8, 0, 0]}
                           shape={(props) => {
-                            const { fill, x, y, width, height, payload } = props;
+                            const { x, y, width, height, payload } = props;
                             const isToday = payload.isToday;
                             return (
                               <rect 
@@ -1167,7 +1167,7 @@ const TestDashboard = () => {
                               if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                                 const total = difficultyData.reduce((sum, item) => sum + item.count, 0);
                                 // Calculate accuracy based on LeetCode total if available
-                                const accuracy = total > 0 ? ((total / (total + 100)) * 100).toFixed(1) : '0.0';
+                                // const accuracy = total > 0 ? ((total / (total + 100)) * 100).toFixed(1) : '0.0';
                                 return (
                                   <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
                                     <tspan x={viewBox.cx} y={(viewBox.cy || 0) - 10} className="fill-white text-4xl font-bold">
