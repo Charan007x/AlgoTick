@@ -53,8 +53,9 @@ const TestDashboard = () => {
         const allNotifications = response.data || [];
         setTopNotifications(allNotifications.slice(0, 2));
         
-        const countResponse = await notificationsAPI.getUnreadCount();
-        setUnreadCount(countResponse.data.count || 0);
+        // Unread count not currently displayed in UI
+        // const countResponse = await notificationsAPI.getUnreadCount();
+        // setUnreadCount(countResponse.data.count || 0);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       }
