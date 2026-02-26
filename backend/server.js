@@ -80,7 +80,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/algotick')
-.then(() => console.log('✅ MongoDB connected successfully'))
+.then(async () => {
+  console.log('✅ MongoDB connected successfully');
+  
+  // Initialize cron jobs after database connection
+  try {
+    await initAICoachCron();
+    await initLeetCodeSyncCron();
+    console.log('✅ Cron jobs initialized successfully');
+  } catch (error) {
+    console.error('❌ Error initializing cron jobs:', error);
+  }
+})
 .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // Routes
@@ -110,12 +121,6 @@ cron.schedule('0 8 * * *', () => {
   console.log('🔔 Running daily reminder check...');
   checkReminders();
 });
-
-// Initialize AI Coach cron job (runs every day at 2 AM)
-initAICoachCron();
-
-// Initialize LeetCode data sync cron job (runs every 6 hours)
-initLeetCodeSyncCron();
 
 // Error handling middleware
 app.use((err, req, res, next) => {

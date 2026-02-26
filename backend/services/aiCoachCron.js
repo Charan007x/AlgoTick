@@ -3,6 +3,7 @@ const aiCoachService = require('../ai-services/aiCoachService');
 const AICoachCache = require('../models/AICoachCache');
 const AIProfile = require('../models/AIProfile');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+const CronSettings = require('../models/CronSettings');
 
 // Cron job state management
 let cronJobEnabled = true;
@@ -171,7 +172,26 @@ async function refreshAllUsers() {
 /**
  * Initialize cron job scheduler
  */
-function initAICoachCron() {
+async function initAICoachCron() {
+  // Load initial state from database
+  try {
+    let settings = await CronSettings.findOne({ jobName: 'aiCoach' });
+    
+    // Create default settings if not exists
+    if (!settings) {
+      settings = await CronSettings.create({ 
+        jobName: 'aiCoach', 
+        enabled: true 
+      });
+    }
+    
+    cronJobEnabled = settings.enabled;
+    console.log(`[Cron] AI Coach initial state: ${cronJobEnabled ? 'enabled' : 'disabled'}`);
+  } catch (error) {
+    console.error('[Cron] Error loading AI Coach settings:', error);
+    cronJobEnabled = true; // Default to enabled on error
+  }
+
   // Schedule cron job for 2am daily (0 2 * * *)
   cronTask = cron.schedule('0 2 * * *', async () => {
     if (!cronJobEnabled) {
@@ -195,10 +215,28 @@ function initAICoachCron() {
 /**
  * Enable or disable the AI Coach cron job
  * @param {boolean} enabled - Whether to enable or disable the cron job
+ * @param {string} userId - ID of admin user making the change
  */
-function setCronJobStatus(enabled) {
-  cronJobEnabled = enabled;
-  console.log(`[Cron] AI Coach ${enabled ? 'enabled' : 'disabled'}`);
+async function setCronJobStatus(enabled, userId = null) {
+  try {
+    cronJobEnabled = enabled;
+    
+    // Save to database
+    await CronSettings.findOneAndUpdate(
+      { jobName: 'aiCoach' },
+      { 
+        enabled, 
+        lastModified: new Date(),
+        modifiedBy: userId 
+      },
+      { upsert: true }
+    );
+    
+    console.log(`[Cron] AI Coach ${enabled ? 'enabled' : 'disabled'} (saved to DB)`);
+  } catch (error) {
+    console.error('[Cron] Error saving AI Coach settings:', error);
+    throw error;
+  }
 }
 
 /**

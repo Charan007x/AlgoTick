@@ -506,7 +506,7 @@ router.get('/cron-status', authMiddleware, isAdmin, async (req, res) => {
 router.post('/cron/leetcode-sync/toggle', authMiddleware, isAdmin, async (req, res) => {
   try {
     const { enabled } = req.body;
-    setLeetcodeCronStatus(enabled);
+    await setLeetcodeCronStatus(enabled, req.user.userId);
     res.json({ 
       message: `LeetCode sync ${enabled ? 'enabled' : 'disabled'}`,
       enabled 
@@ -521,7 +521,7 @@ router.post('/cron/leetcode-sync/toggle', authMiddleware, isAdmin, async (req, r
 router.post('/cron/ai-coach/toggle', authMiddleware, isAdmin, async (req, res) => {
   try {
     const { enabled } = req.body;
-    setAICoachCronStatus(enabled);
+    await setAICoachCronStatus(enabled, req.user.userId);
     res.json({ 
       message: `AI Coach ${enabled ? 'enabled' : 'disabled'}`,
       enabled 

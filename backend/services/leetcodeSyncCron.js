@@ -3,6 +3,7 @@ const User = require('../models/User');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 const { LeetCodeUserStatsCache } = require('../models/LeetCodeCache');
 const SyncLog = require('../models/SyncLog');
+const CronSettings = require('../models/CronSettings');
 const { getUserActivitySummaryFromAPI } = require('./leetcodeService');
 const axios = require('axios');
 
@@ -365,7 +366,26 @@ async function syncAllUsersLeetCodeData(progressCallback = null) {
 /**
  * Initialize LeetCode sync cron job
  */
-function initLeetCodeSyncCron() {
+async function initLeetCodeSyncCron() {
+  // Load initial state from database
+  try {
+    let settings = await CronSettings.findOne({ jobName: 'leetcodeSync' });
+    
+    // Create default settings if not exists
+    if (!settings) {
+      settings = await CronSettings.create({ 
+        jobName: 'leetcodeSync', 
+        enabled: true 
+      });
+    }
+    
+    cronJobEnabled = settings.enabled;
+    console.log(`[Cron] LeetCode sync initial state: ${cronJobEnabled ? 'enabled' : 'disabled'}`);
+  } catch (error) {
+    console.error('[Cron] Error loading LeetCode sync settings:', error);
+    cronJobEnabled = true; // Default to enabled on error
+  }
+
   // Schedule cron job to run daily at 2am
   // Pattern: '0 2 * * *' means at 2:00 AM every day
   cronTask = cron.schedule('0 2 * * *', async () => {
@@ -393,10 +413,28 @@ function initLeetCodeSyncCron() {
 /**
  * Enable or disable the LeetCode sync cron job
  * @param {boolean} enabled - Whether to enable or disable the cron job
+ * @param {string} userId - ID of admin user making the change
  */
-function setCronJobStatus(enabled) {
-  cronJobEnabled = enabled;
-  console.log(`[Cron] LeetCode sync ${enabled ? 'enabled' : 'disabled'}`);
+async function setCronJobStatus(enabled, userId = null) {
+  try {
+    cronJobEnabled = enabled;
+    
+    // Save to database
+    await CronSettings.findOneAndUpdate(
+      { jobName: 'leetcodeSync' },
+      { 
+        enabled, 
+        lastModified: new Date(),
+        modifiedBy: userId 
+      },
+      { upsert: true }
+    );
+    
+    console.log(`[Cron] LeetCode sync ${enabled ? 'enabled' : 'disabled'} (saved to DB)`);
+  } catch (error) {
+    console.error('[Cron] Error saving LeetCode sync settings:', error);
+    throw error;
+  }
 }
 
 /**
