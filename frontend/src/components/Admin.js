@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { LineChart as MUILineChart } from '@mui/x-charts/LineChart';
 import { useAnimate } from '@mui/x-charts/hooks';
 import { ChartContainer } from '@mui/x-charts/ChartContainer';
@@ -79,9 +78,9 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
-  const [activeNav, setActiveNav] = useState('admin');
   const [hoveredNav, setHoveredNav] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [userData, setUserData] = useState({ username: '', email: '' });
   const [activeSection, setActiveSection] = useState('dashboard'); // dashboard, notifications, cron
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -206,6 +205,7 @@ const Admin = () => {
         eventSourceRef.current.close();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Fetch sent notifications when notifications section is active
@@ -213,6 +213,7 @@ const Admin = () => {
     if (activeSection === 'notifications') {
       fetchSentNotifications();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   const handleSyncAll = async () => {
@@ -292,6 +293,7 @@ const Admin = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleClearStaleCache = async () => {
     const confirmed = await confirm({
       title: 'Clear Stale Cache',
@@ -322,6 +324,7 @@ const Admin = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleForceRefresh = async () => {
     const confirmed = await confirm({
       title: 'Force Refresh All Data',
@@ -344,7 +347,7 @@ const Admin = () => {
       
       if (!response.ok) throw new Error('Force refresh failed');
       
-      const result = await response.json();
+      await response.json();
       toast.success('All data refreshed successfully!');
       await fetchAdminStats();
     } catch (err) {
@@ -1173,6 +1176,7 @@ const Admin = () => {
     );
   };
 
+  // eslint-disable-next-line no-unused-vars
   const navItems = [
     { id: 'home', icon: Home, label: 'Home', path: '/home' },
     { id: 'lists', icon: List, label: 'Lists', path: '/lists' },

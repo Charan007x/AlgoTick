@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Send, Users, Award, TrendingUp, Zap, AlertCircle, X, Trash2, Eye } from 'lucide-react';
+import { Bell, Send, Users, Award, TrendingUp, Zap, AlertCircle, Trash2, Eye } from 'lucide-react';
 import { notificationsAPI } from '../services/api';
 import { useConfirm } from '../context/ConfirmContext';
-import AdminLoader from '../components/AdminLoader';
 
 const AdminNotifications = () => {
   const navigate = useNavigate();

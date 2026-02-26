@@ -71,6 +71,7 @@ const CustomLists = () => {
 
     fetchTopNotifications();
     fetchLists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
