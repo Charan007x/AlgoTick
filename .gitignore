@@ -45,5 +45,5 @@ coverage/
 *.pem
 .cache/
 .temp/
-context/
+/context/
 docs/
