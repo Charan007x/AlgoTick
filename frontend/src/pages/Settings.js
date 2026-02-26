@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Search, User, Home, List, FlaskConical, StickyNote, Settings as SettingsIcon, Save, RefreshCw, TrendingUp, Award, Shield, Bell, LogOut } from 'lucide-react';
 import axios from 'axios';
 import { notificationsAPI } from '../services/api';
-import HamsterLoader from '../components/HamsterLoader';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -85,6 +84,7 @@ const Settings = () => {
   // Fetch current username on component mount
   useEffect(() => {
     fetchCurrentUsername();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCurrentUsername = async () => {
