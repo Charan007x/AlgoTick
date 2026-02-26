@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Home, List, FlaskConical, StickyNote, Settings, Bell, LogOut, Check, Trash2, Filter, X, Award, TrendingUp, Zap, AlertCircle } from 'lucide-react';
+import { Search, User, Home, List, FlaskConical, StickyNote, Settings, Bell, LogOut, Check, Trash2, Award, TrendingUp, Zap, AlertCircle } from 'lucide-react';
 import { notificationsAPI } from '../services/api';
 import { useConfirm } from '../context/ConfirmContext';
 

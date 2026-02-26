@@ -33,7 +33,7 @@ const OAuthCallback = () => {
 
         // Verify token works by fetching user data
         try {
-          const response = await authAPI.getCurrentUser();
+          await authAPI.getCurrentUser();
           
           // Update auth context
           setToken(token);
