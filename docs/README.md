@@ -346,7 +346,7 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-Built with ❤️ using the MERN stack
+Sai Charan Gottipalli
 
 ## 🙏 Acknowledgments
 
