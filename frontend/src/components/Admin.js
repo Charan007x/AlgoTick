@@ -7,12 +7,13 @@ import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ChartsYAxis } from '@mui/x-charts/ChartsYAxis';
 import { styled } from '@mui/material/styles';
 import { interpolateObject } from '@mui/x-charts-vendor/d3-interpolate';
-import { Download, RefreshCw, Users, Activity, Database, Clock, CheckCircle, XCircle, AlertCircle, Home, List, FlaskConical, StickyNote, Settings, User, Shield, Bell, Send, X, Trash2, LayoutDashboard, BellRing, CalendarClock, LogOut } from 'lucide-react';
+import { Download, RefreshCw, Users, Activity, Database, Clock, CheckCircle, XCircle, AlertCircle, Home, List, FlaskConical, Settings, User, Shield, Bell, Send, X, Trash2, LayoutDashboard, BellRing, CalendarClock, LogOut, Code2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import AdminLoader from './AdminLoader';
+import AdminAlgorithms from './AdminAlgorithms';
 
 // Styled Text component for bar labels
 const BarLabelText = styled('text')(({ theme }) => ({
@@ -516,6 +517,8 @@ const Admin = () => {
         return renderNotifications();
       case 'cron':
         return renderCronJobs();
+      case 'algorithms':
+        return <AdminAlgorithms />;
       default:
         return renderDashboard();
     }
@@ -1236,13 +1239,14 @@ const Admin = () => {
     { id: 'home', icon: Home, label: 'Home', path: '/home' },
     { id: 'lists', icon: List, label: 'Lists', path: '/lists' },
     { id: 'labs', icon: FlaskConical, label: 'Labs', path: '/labs' },
-    { id: 'notes', icon: StickyNote, label: 'Notes', path: '/notes' },
+    { id: 'algorithms', icon: Code2, label: 'Algorithms', path: '/algorithms' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/settings' },
     { id: 'admin', icon: Shield, label: 'Admin', path: '/admin' }
   ];
 
   const adminSections = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', color: 'teal' },
+    { id: 'algorithms', icon: Code2, label: 'Algorithms', color: 'teal' },
     { id: 'notifications', icon: BellRing, label: 'Notifications', color: 'purple' },
     { id: 'cron', icon: CalendarClock, label: 'Cron Jobs', color: 'blue' }
   ];

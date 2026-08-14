@@ -7,7 +7,7 @@ import {
   Home,
   List,
   FlaskConical,
-  StickyNote,
+  Code2,
   Settings,
   Bell,
   LogOut,
@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { id: "home", icon: Home, label: "Home", path: "/home" },
   { id: "lists", icon: List, label: "Lists", path: "/lists" },
   { id: "labs", icon: FlaskConical, label: "Labs", path: "/labs" },
-  { id: "notes", icon: StickyNote, label: "Notes", path: "/notes" },
+  { id: "algorithms", icon: Code2, label: "Algorithms", path: "/algorithms" },
   { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
   { id: "profile", icon: User, label: "Profile", path: "/profile" },
 ];
@@ -29,7 +29,7 @@ const PATH_TO_NAV = {
   "/home": "home",
   "/lists": "lists",
   "/labs": "labs",
-  "/notes": "notes",
+  "/algorithms": "algorithms",
   "/settings": "settings",
   "/profile": "profile",
   "/notifications": "notifications",
@@ -55,7 +55,9 @@ export default function AppLayout() {
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
 
-  const activeNav = PATH_TO_NAV[location.pathname] || "";
+  const activeNav = location.pathname.startsWith("/algorithms")
+    ? "algorithms"
+    : PATH_TO_NAV[location.pathname] || "";
   const userData = {
     username: user?.username || "User",
     email: user?.email || "",

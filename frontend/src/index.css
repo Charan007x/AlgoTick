@@ -432,3 +432,21 @@ html {
   opacity: 1;
 }
 
+.java-code {
+  color: #e5e7eb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.java-keyword {
+  color: #5eead4;
+}
+
+.java-string {
+  color: #fbbf24;
+}
+
+.java-comment {
+  color: #6b7280;
+  font-style: italic;
+}
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './context/AuthContext';
@@ -16,7 +16,7 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Dashboard from './pages/Dashboard';
 import CustomLists from './pages/CustomLists';
-import Notes from './pages/Notes';
+import Algorithms from './pages/Algorithms';
 import Notifications from './pages/Notifications';
 import AdminNotifications from './pages/AdminNotifications';
 import Settings from './pages/Settings';
@@ -50,7 +50,9 @@ function App() {
             <Route element={<AppLayout />}>
               <Route path="/home" element={<TestDashboard />} />
               <Route path="/lists" element={<CustomLists />} />
-              <Route path="/notes" element={<Notes />} />
+              <Route path="/notes" element={<Navigate to="/algorithms" replace />} />
+              <Route path="/algorithms" element={<Algorithms />} />
+              <Route path="/algorithms/:algorithmSlug" element={<Algorithms />} />
               <Route path="/labs" element={<Labs />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />

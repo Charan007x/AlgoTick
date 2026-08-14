@@ -16,6 +16,8 @@ export const queryKeys = {
   lists: ["lists"],
   list: (id) => ["lists", id],
   notes: ["notes"],
+  algorithms: ["algorithms"],
+  algorithm: (id) => ["algorithms", id],
   dashboardStats: (filter = "all") => ["dashboardStats", filter],
   leetcodeActivity: ["leetcodeActivity"],
   questions: (params = {}) => ["questions", params],

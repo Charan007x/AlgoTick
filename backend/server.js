@@ -33,6 +33,7 @@ const questionRoutes = require("./routes/questions");
 const listRoutes = require("./routes/lists");
 const aiCoachRoutes = require("./routes/aiCoach");
 const notesRoutes = require("./routes/notes");
+const algorithmRoutes = require("./routes/algorithms");
 const notificationRoutes = require("./routes/notifications");
 const adminRoutes = require("./routes/admin");
 
@@ -142,6 +143,7 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/ai-coach", aiCoachRoutes);
 app.use("/api/notes", notesRoutes);
+app.use("/api/algorithms", algorithmRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 

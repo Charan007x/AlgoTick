@@ -64,10 +64,10 @@ const Navbar = () => {
               Labs
             </Link>
             <Link
-              to="/notes"
+              to="/algorithms"
               className="text-white/70 hover:text-white font-medium transition-colors text-sm"
             >
-              Notes
+              Algorithms
             </Link>
             <Link
               to="/settings"
@@ -131,11 +131,11 @@ const Navbar = () => {
               Labs
             </Link>
             <Link
-              to="/notes"
+              to="/algorithms"
               onClick={closeMenu}
               className="block text-white/70 hover:text-white hover:bg-white/5 font-medium transition-colors text-sm px-4 py-2 rounded-lg"
             >
-              Notes
+              Algorithms
             </Link>
             <Link
               to="/settings"

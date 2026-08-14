@@ -114,6 +114,18 @@ export const aiCoachAPI = {
   refresh: () => api.post("/ai-coach/refresh"),
 };
 
+// Algorithms API
+export const algorithmsAPI = {
+  getAll: () => api.get("/algorithms"),
+  getOne: (id) => api.get(`/algorithms/${id}`),
+  create: (data) => api.post("/algorithms", data),
+  refresh: (id) => api.put(`/algorithms/${id}/refresh`),
+  delete: (id) => api.delete(`/algorithms/${id}`),
+  createFolder: (data) => api.post("/algorithms/folders", data),
+  updateFolder: (id, data) => api.put(`/algorithms/folders/${id}`, data),
+  deleteFolder: (id) => api.delete(`/algorithms/folders/${id}`),
+};
+
 // Notifications API
 export const notificationsAPI = {
   getNotifications: () => api.get("/notifications"),
