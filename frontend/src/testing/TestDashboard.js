@@ -40,7 +40,6 @@ const TestDashboard = () => {
 
   const dashboardData = statsQuery.data;
   const leetcodeActivity = leetcodeQuery.data;
-  const recentProblems = questionsQuery.data || [];
   const aiCoachData = aiCoachQuery.data;
   const loading =
     (statsQuery.isLoading && !statsQuery.data) ||
@@ -168,8 +167,8 @@ const TestDashboard = () => {
     [activeDifficulty, difficultyData]
   );
 
-  // Format recent problems
   const formattedRecentProblems = useMemo(() => {
+    const recentProblems = questionsQuery.data || [];
     return recentProblems.slice(0, 3).map((problem, index) => ({
       title: problem.title || 'Problem',
       difficulty: problem.difficulty || 'Easy',
@@ -177,7 +176,7 @@ const TestDashboard = () => {
       status: problem.isRevised ? 'Revised' : 'Pending',
       icon: index % 2 === 0 ? 'chart' : 'link'
     }));
-  }, [recentProblems]);
+  }, [questionsQuery.data]);
 
   return (
     <>
