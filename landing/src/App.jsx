@@ -1,9 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import LetterGlitch from './components/LetterGlitch';
-import LANDING_ICONS from './constants/icons';
+import { useState, useEffect, useRef } from "react";
+import LetterGlitch from "./components/LetterGlitch";
+import LANDING_ICONS from "./constants/icons";
 
-// Use environment variable for app URL, fallback to localhost for development
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
+function getAppUrl() {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "localhost";
+  const onLan =
+    import.meta.env.DEV &&
+    hostname !== "localhost" &&
+    hostname !== "127.0.0.1";
+
+  if (onLan) {
+    return `${window.location.protocol}//${hostname}:3000`;
+  }
+
+  return import.meta.env.VITE_APP_URL || "http://localhost:3000";
+}
+
+const APP_URL = getAppUrl();
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,7 +62,7 @@ function App() {
           previousY.current[index] = currentY;
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     numberRefs.current.forEach((ref) => {
@@ -68,7 +82,7 @@ function App() {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     cardRefs.current.forEach((ref) => {
@@ -88,7 +102,7 @@ function App() {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     stepRefs.current.forEach((ref) => {
@@ -108,7 +122,7 @@ function App() {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     sectionRefs.current.forEach((ref) => {
@@ -121,34 +135,40 @@ function App() {
   const features = [
     {
       Icon: LANDING_ICONS.BRAIN,
-      title: 'Remember Forever',
-      description: 'Get reminded exactly when you need to revise. Turn short-term wins into long-term mastery.'
+      title: "Remember Forever",
+      description:
+        "Get reminded exactly when you need to revise. Turn short-term wins into long-term mastery.",
     },
     {
       Icon: LANDING_ICONS.LIGHTNING,
-      title: 'Stop Wasting Time',
-      description: 'No more guessing what to practice. Know exactly which problems need your attention today.'
+      title: "Stop Wasting Time",
+      description:
+        "No more guessing what to practice. Know exactly which problems need your attention today.",
     },
     {
       Icon: LANDING_ICONS.CHECKMARK,
-      title: 'Honest Progress Tracking',
-      description: 'Only solved problems count. We verify you actually did the work after adding it to your list.'
+      title: "Honest Progress Tracking",
+      description:
+        "Only solved problems count. We verify you actually did the work after adding it to your list.",
     },
     {
       Icon: LANDING_ICONS.CHART,
-      title: 'Watch Your Growth',
-      description: 'See your improving retention rate. Celebrate completing revision cycles and building real skills.'
+      title: "Watch Your Growth",
+      description:
+        "See your improving retention rate. Celebrate completing revision cycles and building real skills.",
     },
     {
       Icon: LANDING_ICONS.TARGET,
-      title: 'Stay Focused',
-      description: 'Clean interface with zero distractions. Just you, your goals, and the problems that matter.'
+      title: "Stay Focused",
+      description:
+        "Clean interface with zero distractions. Just you, your goals, and the problems that matter.",
     },
     {
       Icon: LANDING_ICONS.LOCK,
-      title: 'Your Data, Your Control',
-      description: 'Practice privately. Your progress and study patterns stay completely confidential.'
-    }
+      title: "Your Data, Your Control",
+      description:
+        "Practice privately. Your progress and study patterns stay completely confidential.",
+    },
   ];
 
   return (
@@ -160,21 +180,27 @@ function App() {
             {/* Logo */}
             <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#61dca3] to-[#61b3dc] rounded-lg flex items-center justify-center">
-                <LANDING_ICONS.TICK className="w-5 h-5 sm:w-6 sm:h-6 text-black" strokeWidth={3} />
+                <LANDING_ICONS.TICK
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-black"
+                  strokeWidth={3}
+                />
               </div>
-              <span className="text-lg sm:text-xl font-bold tracking-tight"><span className="text-white">Algo</span><span className="text-[#61dca3]">Tick</span></span>
+              <span className="text-lg sm:text-xl font-bold tracking-tight">
+                <span className="text-white">Algo</span>
+                <span className="text-[#61dca3]">Tick</span>
+              </span>
             </div>
-            
+
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-6">
-              <button 
-                onClick={() => window.location.href = `${APP_URL}/login`}
+              <button
+                onClick={() => (window.location.href = `${APP_URL}/login`)}
                 className="text-white/80 hover:text-white transition-colors text-sm font-medium"
               >
                 Sign In
               </button>
-              <button 
-                onClick={() => window.location.href = `${APP_URL}/signup`}
+              <button
+                onClick={() => (window.location.href = `${APP_URL}/signup`)}
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-full text-sm font-semibold transition-all"
               >
                 Get Started
@@ -188,12 +214,32 @@ function App() {
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -202,7 +248,7 @@ function App() {
           {/* Mobile Menu Dropdown */}
           {isMenuOpen && (
             <div className="md:hidden border-t border-white/10 py-4 space-y-3 opacity-0 animate-slideDown">
-              <button 
+              <button
                 onClick={() => {
                   closeMenu();
                   window.location.href = `${APP_URL}/login`;
@@ -211,7 +257,7 @@ function App() {
               >
                 Sign In
               </button>
-              <button 
+              <button
                 onClick={() => {
                   closeMenu();
                   window.location.href = `${APP_URL}/signup`;
@@ -233,19 +279,21 @@ function App() {
             centerVignette={true}
             outerVignette={false}
             smooth={true}
-            glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+            glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
           />
         </div>
-        
+
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 sm:px-6">
           <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-bold mb-6 sm:mb-8 opacity-0 animate-scaleUp leading-[1.1] tracking-tight">
             <div className="text-white font-bold">Never Forget</div>
-            <div className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc] font-bold">What You Learn</div>
+            <div className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc] font-bold">
+              What You Learn
+            </div>
           </h1>
           <div className="opacity-0 animate-slideUp delay-400">
-            <button 
-              onClick={() => window.location.href = `${APP_URL}/signup`}
+            <button
+              onClick={() => (window.location.href = `${APP_URL}/signup`)}
               className="bg-gradient-to-r from-[#61dca3] to-[#61b3dc] text-black px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-bold transition-all transform hover:scale-110 hover:shadow-2xl hover:shadow-[#61dca3]/50 active:scale-95 animate-glow"
             >
               Start Tracking Free
@@ -255,7 +303,15 @@ function App() {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6 text-white/50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="w-6 h-6 text-white/50"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </div>
@@ -264,37 +320,49 @@ function App() {
       {/* Features Section */}
       <section className="relative bg-black py-12 sm:py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div 
+          <div
             ref={(el) => (sectionRefs.current[3] = el)}
             data-sectionindex="features"
-            className={`text-center mb-10 sm:mb-12 md:mb-16 ${visibleSections.includes('features') ? 'animate-card-fade' : 'opacity-0'}`}
+            className={`text-center mb-10 sm:mb-12 md:mb-16 ${visibleSections.includes("features") ? "animate-card-fade" : "opacity-0"}`}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 px-2">
-              Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">Serious Learners</span>
+              Built for{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">
+                Serious Learners
+              </span>
             </h2>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {features.map((feature, index) => {
               // First row (0,1,2) - no delay, second row (3,4,5) - delay-300
-              const delayClass = index < 3 ? '' : 'delay-300';
-              
+              const delayClass = index < 3 ? "" : "delay-300";
+
               const FeatureIcon = feature.Icon;
               const isVisible = visibleCards.includes(index);
-              
+
               return (
-                <div 
+                <div
                   key={index}
                   ref={(el) => (cardRefs.current[index] = el)}
                   data-cardindex={index}
-                  className={isVisible ? `animate-card-fade ${delayClass}` : 'opacity-0'}
+                  className={
+                    isVisible ? `animate-card-fade ${delayClass}` : "opacity-0"
+                  }
                 >
                   <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-[#61dca3]/50 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#61dca3]/20 h-full">
                     <div className="mb-3 sm:mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                      <FeatureIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#61dca3]" strokeWidth={2} />
+                      <FeatureIcon
+                        className="w-10 h-10 sm:w-12 sm:h-12 text-[#61dca3]"
+                        strokeWidth={2}
+                      />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">{feature.title}</h3>
-                    <p className="text-sm sm:text-base text-white/60 leading-relaxed">{feature.description}</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm sm:text-base text-white/60 leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
                 </div>
               );
@@ -306,42 +374,65 @@ function App() {
       {/* How It Works Section */}
       <section className="relative bg-gradient-to-b from-black to-[#0a0a0a] py-12 sm:py-16 md:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div 
+          <div
             ref={(el) => (sectionRefs.current[0] = el)}
             data-sectionindex="how-it-works"
-            className={`text-center mb-16 sm:mb-20 md:mb-24 ${visibleSections.includes('how-it-works') ? 'animate-card-fade' : 'opacity-0'}`}
+            className={`text-center mb-16 sm:mb-20 md:mb-24 ${visibleSections.includes("how-it-works") ? "animate-card-fade" : "opacity-0"}`}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
-              How It <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">Works</span>
+              How It{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">
+                Works
+              </span>
             </h2>
           </div>
 
           <div className="space-y-16 sm:space-y-20 md:space-y-24">
             {[
-              { num: '01', title: 'Add Questions', desc: 'Paste any LeetCode URL. We fetch title, difficulty, and tags automatically.' },
-              { num: '02', title: 'Set LeetCode Profile', desc: 'Link your LeetCode username in settings for automatic verification.' },
-              { num: '03', title: 'Solve & Revise', desc: 'Get reminded to revise at optimal intervals. Solve the problem again.' },
-              { num: '04', title: 'Verify Progress', desc: 'Click checkbox to verify. We check your last 20 submissions.' }
+              {
+                num: "01",
+                title: "Add Questions",
+                desc: "Paste any LeetCode URL. We fetch title, difficulty, and tags automatically.",
+              },
+              {
+                num: "02",
+                title: "Set LeetCode Profile",
+                desc: "Link your LeetCode username in settings for automatic verification.",
+              },
+              {
+                num: "03",
+                title: "Solve & Revise",
+                desc: "Get reminded to revise at optimal intervals. Solve the problem again.",
+              },
+              {
+                num: "04",
+                title: "Verify Progress",
+                desc: "Click checkbox to verify. We check your last 20 submissions.",
+              },
             ].map((step, index) => {
               const isReversed = index % 2 !== 0;
-              
+
               return (
-                <div 
+                <div
                   key={index}
-                  className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-8 md:gap-12 lg:gap-16`}
+                  className={`flex flex-col ${isReversed ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-8 md:gap-12 lg:gap-16`}
                 >
                   {/* Large Outlined Number */}
-                  <div className={`flex-shrink-0 ${isReversed ? 'md:justify-start' : 'md:justify-end'} flex justify-center md:w-1/3`}>
-                    <span 
+                  <div
+                    className={`flex-shrink-0 ${isReversed ? "md:justify-start" : "md:justify-end"} flex justify-center md:w-1/3`}
+                  >
+                    <span
                       ref={(el) => (numberRefs.current[index] = el)}
                       data-index={index}
                       data-num={step.num}
                       className={`step-number text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] font-bold ${
-                        visibleNumbers.includes(index) ? 'step-number-solid' : ''
+                        visibleNumbers.includes(index)
+                          ? "step-number-solid"
+                          : ""
                       }`}
-                      style={{ 
-                        WebkitTextStroke: '2px #61dca3',
-                        fontFamily: 'Space Grotesk, Arial, sans-serif'
+                      style={{
+                        WebkitTextStroke: "2px #61dca3",
+                        fontFamily: "Space Grotesk, Arial, sans-serif",
                       }}
                     >
                       {step.num}
@@ -349,15 +440,17 @@ function App() {
                   </div>
 
                   {/* Text Content */}
-                  <div 
+                  <div
                     ref={(el) => (stepRefs.current[index] = el)}
                     data-stepindex={index}
-                    className={`flex-1 text-center ${isReversed ? 'md:text-right' : 'md:text-left'} ${visibleSteps.includes(index) ? 'animate-card-fade delay-200' : 'opacity-0'}`}
+                    className={`flex-1 text-center ${isReversed ? "md:text-right" : "md:text-left"} ${visibleSteps.includes(index) ? "animate-card-fade delay-200" : "opacity-0"}`}
                   >
                     <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
                       {step.title}
                     </h3>
-                    <p className={`text-base sm:text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto ${isReversed ? 'md:mr-0 md:ml-auto' : 'md:mx-0'}`}>
+                    <p
+                      className={`text-base sm:text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto ${isReversed ? "md:mr-0 md:ml-auto" : "md:mx-0"}`}
+                    >
                       {step.desc}
                     </p>
                   </div>
@@ -370,26 +463,32 @@ function App() {
 
       {/* CTA Section */}
       <section className="relative bg-[#0a0a0a] py-12 sm:py-16 md:py-20">
-        <div 
+        <div
           ref={(el) => (sectionRefs.current[2] = el)}
           data-sectionindex="cta"
           className="max-w-4xl mx-auto px-4 sm:px-6 text-center"
         >
-          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 ${visibleSections.includes('cta') ? 'animate-card-fade' : 'opacity-0'}`}>
+          <h2
+            className={`text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 ${visibleSections.includes("cta") ? "animate-card-fade" : "opacity-0"}`}
+          >
             Ready to Master LeetCode?
           </h2>
-          <p className={`text-base sm:text-lg md:text-xl text-white/60 mb-6 sm:mb-8 px-2 ${visibleSections.includes('cta') ? 'animate-card-fade delay-200' : 'opacity-0'}`}>
+          <p
+            className={`text-base sm:text-lg md:text-xl text-white/60 mb-6 sm:mb-8 px-2 ${visibleSections.includes("cta") ? "animate-card-fade delay-200" : "opacity-0"}`}
+          >
             Stop forgetting what you've learned. Build lasting skills today.
           </p>
-          <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ${visibleSections.includes('cta') ? 'animate-card-fade delay-300' : 'opacity-0'}`}>
-            <button 
-              onClick={() => window.location.href = `${APP_URL}/signup`}
+          <div
+            className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ${visibleSections.includes("cta") ? "animate-card-fade delay-300" : "opacity-0"}`}
+          >
+            <button
+              onClick={() => (window.location.href = `${APP_URL}/signup`)}
               className="w-full sm:w-auto bg-gradient-to-r from-[#61dca3] to-[#61b3dc] text-black px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-[#61dca3]/50"
             >
               Start Free Now
             </button>
-            <button 
-              onClick={() => window.location.href = `${APP_URL}/login`}
+            <button
+              onClick={() => (window.location.href = `${APP_URL}/login`)}
               className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold transition-all"
             >
               Sign In
@@ -400,19 +499,34 @@ function App() {
 
       {/* Footer */}
       <footer className="bg-black border-t border-white/10 py-8">
-        <div 
+        <div
           ref={(el) => (sectionRefs.current[1] = el)}
           data-sectionindex="footer"
-          className={`max-w-7xl mx-auto px-4 text-center ${visibleSections.includes('footer') ? 'animate-card-fade' : 'opacity-0'}`}
+          className={`max-w-7xl mx-auto px-4 text-center ${visibleSections.includes("footer") ? "animate-card-fade" : "opacity-0"}`}
         >
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-gradient-to-br from-[#61dca3] to-[#61b3dc] rounded-lg flex items-center justify-center">
-              <LANDING_ICONS.TICK className="w-5 h-5 text-black" strokeWidth={3} />
+              <LANDING_ICONS.TICK
+                className="w-5 h-5 text-black"
+                strokeWidth={3}
+              />
             </div>
-            <span className="font-semibold text-lg"><span className="text-white">Algo</span><span className="text-[#61dca3]">Tick</span></span>
+            <span className="font-semibold text-lg">
+              <span className="text-white">Algo</span>
+              <span className="text-[#61dca3]">Tick</span>
+            </span>
           </div>
           <p className="text-white/40 text-sm">
-            © 2025-26 <span className="text-white">Algo</span><span className="text-[#61dca3]">Tick</span> / GitHub - <a href="https://github.com/Charan007x" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#61dca3] transition-colors duration-200">Charan007x</a>
+            © 2025-26 <span className="text-white">Algo</span>
+            <span className="text-[#61dca3]">Tick</span> / GitHub -{" "}
+            <a
+              href="https://github.com/Charan007x"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/60 hover:text-[#61dca3] transition-colors duration-200"
+            >
+              Charan007x
+            </a>
           </p>
         </div>
       </footer>

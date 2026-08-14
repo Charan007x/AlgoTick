@@ -4,6 +4,8 @@ const AICoachCache = require('../models/AICoachCache');
 const AIProfile = require('../models/AIProfile');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
 const CronSettings = require('../models/CronSettings');
+const { setAICoachCache } = require('./cacheService');
+const { refreshDashboardStatsCache } = require('./dashboardStatsService');
 
 // Cron job state management
 let cronJobEnabled = true;
@@ -105,6 +107,8 @@ async function refreshUserData(userId) {
 
     if (!aiProfile) {
       console.log(`[Cron] AI profile not found for user: ${userId}`);
+      // Still refresh dashboard stats for overnight dueToday correctness
+      await refreshDashboardStatsCache(userId);
       return;
     }
 
@@ -125,7 +129,7 @@ async function refreshUserData(userId) {
       cache.lastRefreshed = new Date();
       await cache.save();
     } else {
-      await AICoachCache.create({
+      cache = await AICoachCache.create({
         userId,
         leetcodeUsername: aiProfile.leetcodeUsername,
         strongTopics: aiProfile.profile.strongTopics,
@@ -135,6 +139,23 @@ async function refreshUserData(userId) {
         cooldownHours: 0 // Change to 6 for production
       });
     }
+
+    // Dual-write Redis (24h TTL)
+    await setAICoachCache(userId, {
+      strongTopics: cache.strongTopics,
+      weakTopics: cache.weakTopics,
+      recommendations: cache.recommendations,
+      lastRefreshed: cache.lastRefreshed,
+      canRefresh: typeof cache.canRefresh === 'function' ? cache.canRefresh() : true,
+      timeUntilRefresh:
+        typeof cache.getTimeUntilRefresh === 'function'
+          ? cache.getTimeUntilRefresh()
+          : { hours: 0, minutes: 0, canRefresh: true },
+      leetcodeUsername: cache.leetcodeUsername,
+    });
+
+    // Rewrite dashboard stats for this user (dueToday overnight freshness)
+    await refreshDashboardStatsCache(userId);
 
     console.log(`[Cron] Successfully refreshed data for user: ${userId}`);
   } catch (error) {
@@ -157,10 +178,26 @@ async function refreshAllUsers() {
     
     console.log(`[Cron] Found ${caches.length} users to refresh`);
 
+    const refreshedUserIds = new Set();
+
     for (const cache of caches) {
       await refreshUserData(cache.userId);
+      refreshedUserIds.add(String(cache.userId));
       // Add small delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    // Also rewrite dashboard stats for users who have questions but no AI coach cache
+    console.log('[Cron] Refreshing dashboard stats for remaining question users...');
+    const Question = require('../models/Question');
+    const questionUserIds = await Question.distinct('userId');
+    for (const userId of questionUserIds) {
+      if (refreshedUserIds.has(String(userId))) continue;
+      try {
+        await refreshDashboardStatsCache(userId);
+      } catch (err) {
+        console.error(`[Cron] Dashboard stats refresh failed for ${userId}:`, err.message);
+      }
     }
 
     console.log('[Cron] Daily refresh completed successfully');

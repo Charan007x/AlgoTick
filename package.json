@@ -12,7 +12,7 @@
     "dev": "concurrently \"npm run dev:landing\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:landing": "cd landing && npm run dev",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && set BROWSER=none && npm start",
+    "dev:frontend": "cd frontend && set BROWSER=none&& set HOST=0.0.0.0&& set DANGEROUSLY_DISABLE_HOST_CHECK=true&& npm start",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",
     "build:all": "cd frontend && npm run build && cd ../landing && npm run build",

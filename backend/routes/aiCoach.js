@@ -5,6 +5,30 @@ const aiCoachService = require('../ai-services/aiCoachService');
 const AICoachCache = require('../models/AICoachCache');
 const AIProfile = require('../models/AIProfile');
 const LeetCodeSubmission = require('../models/LeetCodeSubmission');
+const {
+  getAICoachCache,
+  setAICoachCache,
+  delAICoachCache,
+} = require('../services/cacheService');
+
+function aiCoachRedisPayload(cache) {
+  const canRefresh =
+    typeof cache.canRefresh === 'function' ? cache.canRefresh() : true;
+  const timeUntilRefresh =
+    typeof cache.getTimeUntilRefresh === 'function'
+      ? cache.getTimeUntilRefresh()
+      : { hours: 0, minutes: 0, canRefresh: true };
+
+  return {
+    strongTopics: cache.strongTopics,
+    weakTopics: cache.weakTopics,
+    recommendations: cache.recommendations,
+    lastRefreshed: cache.lastRefreshed,
+    canRefresh,
+    timeUntilRefresh,
+    leetcodeUsername: cache.leetcodeUsername,
+  };
+}
 
 /**
  * @route   GET /api/ai-coach/dashboard
@@ -19,15 +43,30 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
     const userId = req.user.userId || req.user.id;
     console.log('🔍 Looking for cache with userId:', userId);
 
-    // Check cache first
+    // 1) Redis first (skip when ?refresh)
+    if (!req.query.refresh) {
+      const redisHit = await getAICoachCache(userId);
+      if (redisHit) {
+        console.log('✅ Returning Redis cached AI coach data');
+        return res.json({
+          success: true,
+          data: {
+            ...redisHit,
+            cached: true,
+          },
+        });
+      }
+    }
+
+    // 2) Mongo cache
     let cache = await AICoachCache.findOne({ userId });
-    console.log('💾 Cache found:', !!cache);
+    console.log('💾 Mongo cache found:', !!cache);
     
     if (cache && !req.query.refresh) {
-      // Return cached data with cooldown info
       const timeUntilRefresh = cache.getTimeUntilRefresh();
+      await setAICoachCache(userId, aiCoachRedisPayload(cache));
       
-      console.log('✅ Returning cached data');
+      console.log('✅ Returning Mongo cached data (warmed Redis)');
       return res.json({
         success: true,
         data: {
@@ -94,6 +133,8 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       });
       console.log('💾 Cache created');
     }
+
+    await setAICoachCache(userId, aiCoachRedisPayload(cache));
 
     console.log('✅ Sending response');
     res.json({
@@ -194,6 +235,8 @@ router.post('/refresh', authMiddleware, async (req, res) => {
       });
       console.log('✅ Created new cache with Gemini data');
     }
+
+    await setAICoachCache(userId, aiCoachRedisPayload(cache));
 
     res.json({
       success: true,
@@ -383,6 +426,7 @@ async function getAIProfile(userId) {
       console.log(`🔄 Username changed from ${aiProfile.leetcodeUsername} to ${currentUsername}, regenerating profile...`);
       await AIProfile.deleteOne({ userId });
       await AICoachCache.deleteOne({ userId });
+      await delAICoachCache(userId);
       aiProfile = null;
     }
     // If LeetCode submissions username doesn't match current username, force refresh
@@ -392,6 +436,7 @@ async function getAIProfile(userId) {
       if (aiProfile) {
         await AIProfile.deleteOne({ userId });
         await AICoachCache.deleteOne({ userId });
+        await delAICoachCache(userId);
         aiProfile = null;
       }
     }

@@ -202,7 +202,7 @@ const Settings = () => {
 
       {/* Pill-Shaped Glassmorphism Navigation */}
       <nav className="fixed top-3 sm:top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-full px-4 sm:px-8 shadow-2xl">
+        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl lg:rounded-full px-4 sm:px-8 shadow-2xl">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -318,7 +318,7 @@ const Settings = () => {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+              className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -335,15 +335,7 @@ const Settings = () => {
 
           {/* Mobile Menu Dropdown */}
           {isMenuOpen && (
-            <div className="md:hidden border-t border-white/10 py-4 space-y-3">
-              <div className="px-4">
-                <Search className="absolute left-8 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search bar"
-                  className="w-full bg-gray-800/40 border border-white/10 rounded-full py-2 pl-10 pr-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-sm"
-                />
-              </div>
+            <div className="lg:hidden border-t border-white/10 py-4 space-y-3">
               <div className="flex items-center gap-2 px-4 py-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 via-emerald-500 to-teal-500 p-0.5">
                   <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
@@ -351,6 +343,52 @@ const Settings = () => {
                   </div>
                 </div>
                 <span className="text-gray-200 font-medium text-sm">Hi {userData.username}</span>
+              </div>
+              <div className="px-4 space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeNav === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveNav(item.id);
+                        setIsMenuOpen(false);
+                        navigate(item.path);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
+                        isActive
+                          ? 'bg-teal-500/15 text-teal-400'
+                          : 'text-gray-300 hover:text-teal-400 hover:bg-white/5'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="px-4 pt-2 border-t border-white/10 space-y-1">
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/notifications');
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-teal-400 hover:bg-white/5 rounded-lg transition-all"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="text-sm font-medium">Notifications</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-sm font-medium">Logout</span>
+                </button>
               </div>
             </div>
           )}
