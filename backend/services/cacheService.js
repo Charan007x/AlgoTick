@@ -172,9 +172,12 @@ async function setNotesCache(userId, notes) {
   return cacheSet(notesKey(userId), { notes: toPlain(notes) }, TTL.NOTES);
 }
 
-async function delNotesCache(userId) {
+/** Overwrite notes collection cache after a notes mutation. */
+async function writeThroughNotesCache(userId) {
   if (!userId) return;
-  await cacheDel(notesKey(userId));
+  const Note = require("../models/Note");
+  const notes = await Note.find({ userId }).sort({ createdAt: -1 });
+  await setNotesCache(userId, notes);
 }
 
 async function getQuestionsListCache(userId, filter, sortBy, revisedTimeFilter) {
@@ -191,9 +194,112 @@ async function setQuestionsListCache(userId, filter, sortBy, revisedTimeFilter, 
   );
 }
 
-async function delQuestionsListCache(userId) {
+function parseQuestionsListKey(key, userId) {
+  const prefix = `questions:list:${userId}:`;
+  if (!key.startsWith(prefix)) return null;
+  const [filter, sortBy, revisedTimeFilter] = key.slice(prefix.length).split(":");
+  return {
+    filter: filter || "all",
+    sortBy: sortBy || "newest",
+    revisedTimeFilter: !revisedTimeFilter || revisedTimeFilter === "none" ? "" : revisedTimeFilter,
+  };
+}
+
+async function fetchQuestionsForCache(userId, filter, sortBy, revisedTimeFilter) {
+  const Question = require("../models/Question");
+  let query = { userId, isDeleted: false };
+
+  if (filter === "pending") {
+    query.isRevised = false;
+  } else if (filter === "revised") {
+    query.isRevised = true;
+    if (revisedTimeFilter && revisedTimeFilter !== "all") {
+      const now = new Date();
+      let startDate;
+      if (revisedTimeFilter === "today") {
+        startDate = new Date(now);
+        startDate.setHours(0, 0, 0, 0);
+      } else if (revisedTimeFilter === "week") {
+        startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - 7);
+      } else if (revisedTimeFilter === "month") {
+        startDate = new Date(now);
+        startDate.setMonth(startDate.getMonth() - 1);
+      }
+      if (startDate) {
+        query.revisedDates = { $elemMatch: { $gte: startDate } };
+      }
+    }
+  } else if (filter === "due-today") {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    query.nextReminders = { $elemMatch: { $lte: today } };
+    query.isRevised = false;
+  } else if (filter === "due-week") {
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+    query.nextReminders = { $elemMatch: { $lte: nextWeek } };
+    query.isRevised = false;
+  } else if (filter === "due-soon") {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    query.nextReminders = { $elemMatch: { $lte: tomorrow } };
+    query.isRevised = false;
+  } else if (filter === "overdue") {
+    const today = new Date();
+    query.nextReminders = { $elemMatch: { $lt: today } };
+    query.isRevised = false;
+  }
+
+  let sortOption = { dateAdded: -1 };
+  if (sortBy === "oldest") sortOption = { dateAdded: 1 };
+  else if (sortBy === "difficulty") sortOption = { difficulty: 1 };
+  else if (sortBy === "next-reminder") sortOption = { "nextReminders.0": 1 };
+
+  return Question.find(query).sort(sortOption);
+}
+
+const DEFAULT_QUESTION_LIST_COMBOS = [
+  { filter: "due-today", sortBy: "newest", revisedTimeFilter: "" },
+  { filter: "all", sortBy: "newest", revisedTimeFilter: "" },
+];
+
+/** Overwrite existing question-list keys (or warm defaults) after a mutation. */
+async function writeThroughQuestionsListCache(userId) {
   if (!userId) return;
-  await delByPrefix(`questions:list:${userId}:`);
+
+  const redis = getRedis();
+  let combos = [];
+  if (redis && isRedisReady()) {
+    try {
+      const keys = await redis.keys(`questions:list:${userId}:*`);
+      combos = keys.map((key) => parseQuestionsListKey(key, userId)).filter(Boolean);
+    } catch (err) {
+      console.error("writeThroughQuestionsListCache key scan:", err.message);
+    }
+  }
+  if (!combos.length) combos = DEFAULT_QUESTION_LIST_COMBOS;
+
+  const seen = new Set();
+  for (const combo of combos) {
+    const id = `${combo.filter}:${combo.sortBy}:${combo.revisedTimeFilter || "none"}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const questions = await fetchQuestionsForCache(
+      userId,
+      combo.filter,
+      combo.sortBy,
+      combo.revisedTimeFilter,
+    );
+    await setQuestionsListCache(
+      userId,
+      combo.filter,
+      combo.sortBy,
+      combo.revisedTimeFilter,
+      questions,
+    );
+  }
 }
 
 async function getLeetCodeActivityCache(userId) {
@@ -235,10 +341,10 @@ module.exports = {
   leetcodeActivityKey,
   getNotesCache,
   setNotesCache,
-  delNotesCache,
+  writeThroughNotesCache,
   getQuestionsListCache,
   setQuestionsListCache,
-  delQuestionsListCache,
+  writeThroughQuestionsListCache,
   getLeetCodeActivityCache,
   setLeetCodeActivityCache,
   delLeetCodeActivityCache,

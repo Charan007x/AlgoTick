@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/auth');
 const {
   getNotesCache,
   setNotesCache,
-  delNotesCache,
+  writeThroughNotesCache,
 } = require('../services/cacheService');
 
 // All routes require authentication
@@ -71,7 +71,7 @@ router.post('/', async (req, res) => {
     
     const newNote = new Note(noteData);
     await newNote.save();
-    await delNotesCache(req.user.id);
+    await writeThroughNotesCache(req.user.id);
     
     res.status(201).json({ 
       message: 'Note created successfully', 
@@ -109,7 +109,7 @@ router.put('/:id', async (req, res) => {
     }
     
     await note.save();
-    await delNotesCache(req.user.id);
+    await writeThroughNotesCache(req.user.id);
 
     res.json({ 
       message: 'Note updated successfully', 
@@ -136,7 +136,7 @@ router.delete('/:id', async (req, res) => {
     }
     
     await Note.deleteOne({ _id: req.params.id });
-    await delNotesCache(req.user.id);
+    await writeThroughNotesCache(req.user.id);
     
     res.json({ message: 'Note deleted successfully' });
   } catch (error) {

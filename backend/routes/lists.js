@@ -15,7 +15,7 @@ const {
   cacheSet,
   writeThroughListCaches,
   deleteListFromCache,
-  delQuestionsListCache,
+  writeThroughQuestionsListCache,
 } = require("../services/cacheService");
 const { refreshDashboardStatsCache } = require("../services/dashboardStatsService");
 
@@ -316,7 +316,7 @@ router.post("/:id/add-question-to-today", async (req, res) => {
         existingQuestion.dateAdded = now; // Update dateAdded for verification
         await existingQuestion.save();
         await refreshDashboardStatsCache(req.user.id);
-        await delQuestionsListCache(req.user.id);
+        await writeThroughQuestionsListCache(req.user.id);
 
         return res.json({
           message: "Question restored and added to today's reminders",
@@ -347,7 +347,7 @@ router.post("/:id/add-question-to-today", async (req, res) => {
 
       await existingQuestion.save();
       await refreshDashboardStatsCache(req.user.id);
-      await delQuestionsListCache(req.user.id);
+      await writeThroughQuestionsListCache(req.user.id);
 
       return res.json({
         message: "Question added to today's reminders",
@@ -372,7 +372,7 @@ router.post("/:id/add-question-to-today", async (req, res) => {
 
     await newQuestion.save();
     await refreshDashboardStatsCache(req.user.id);
-    await delQuestionsListCache(req.user.id);
+    await writeThroughQuestionsListCache(req.user.id);
 
     res.status(201).json({
       message: "Question added to today's due",
@@ -474,7 +474,7 @@ router.post("/:id/add-all-to-today", async (req, res) => {
 
     if (addedCount + updatedCount + restoredCount > 0) {
       await refreshDashboardStatsCache(req.user.id);
-      await delQuestionsListCache(req.user.id);
+      await writeThroughQuestionsListCache(req.user.id);
     }
 
     res.json({

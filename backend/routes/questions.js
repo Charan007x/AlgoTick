@@ -18,7 +18,7 @@ const {
 const {
   getQuestionsListCache,
   setQuestionsListCache,
-  delQuestionsListCache,
+  writeThroughQuestionsListCache,
   getLeetCodeActivityCache,
   setLeetCodeActivityCache,
 } = require("../services/cacheService");
@@ -68,7 +68,7 @@ router.post("/", async (req, res) => {
 
         await existingQuestion.save();
         await refreshDashboardStatsCache(req.user.id);
-        await delQuestionsListCache(req.user.id);
+        await writeThroughQuestionsListCache(req.user.id);
 
         return res.status(200).json({
           message: "Question restored successfully",
@@ -97,7 +97,7 @@ router.post("/", async (req, res) => {
 
     await newQuestion.save();
     await refreshDashboardStatsCache(req.user.id);
-    await delQuestionsListCache(req.user.id);
+    await writeThroughQuestionsListCache(req.user.id);
 
     res.status(201).json({
       message: "Question added successfully",
@@ -348,7 +348,7 @@ router.put("/:id/revise", async (req, res) => {
     question.markRevised();
     await question.save();
     await refreshDashboardStatsCache(req.user.id);
-    await delQuestionsListCache(req.user.id);
+    await writeThroughQuestionsListCache(req.user.id);
 
     console.log(`✅ Verified and marked as revised: "${question.title}"`);
 
@@ -379,6 +379,8 @@ router.put("/:id", async (req, res) => {
     if (!question) {
       return res.status(404).json({ message: "Question not found" });
     }
+
+    await writeThroughQuestionsListCache(req.user.id);
 
     res.json({
       message: "Question updated successfully",
@@ -411,7 +413,7 @@ router.delete("/:id", async (req, res) => {
     }
 
     await refreshDashboardStatsCache(req.user.id);
-    await delQuestionsListCache(req.user.id);
+    await writeThroughQuestionsListCache(req.user.id);
     res.json({ message: "Question removed successfully" });
   } catch (error) {
     console.error("Delete question error:", error);
@@ -462,6 +464,7 @@ router.post("/:id/verify-submission", async (req, res) => {
       question.markRevised();
       await question.save();
       await refreshDashboardStatsCache(req.user.id);
+      await writeThroughQuestionsListCache(req.user.id);
       console.log(`✅ Question "${question.title}" marked as revised`);
     }
 
@@ -546,6 +549,7 @@ router.post("/bulk-verify", async (req, res) => {
 
     if (updatedCount > 0) {
       await refreshDashboardStatsCache(req.user.id);
+      await writeThroughQuestionsListCache(req.user.id);
     }
 
     res.json({

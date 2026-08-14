@@ -6,7 +6,8 @@ const User = require('../models/User');
 const passport = require('../config/passport');
 const { syncAllUsersLeetCodeData, syncSpecificUser } = require('../services/leetcodeSyncCron');
 const authMiddleware = require('../middleware/auth');
-const { delLeetCodeActivityCache } = require('../services/cacheService');
+const { setLeetCodeActivityCache, delLeetCodeActivityCache } = require('../services/cacheService');
+const { getUserActivitySummary } = require('../services/leetcodeService');
 
 // @route   POST /api/auth/signup
 // @desc    Register a new user
@@ -187,7 +188,22 @@ router.put('/leetcode-username', async (req, res) => {
     
     user.leetcodeUsername = leetcodeUsername.trim();
     await user.save();
-    await delLeetCodeActivityCache(user._id);
+
+    try {
+      const activity = await getUserActivitySummary(
+        user.leetcodeUsername,
+        user._id,
+        true,
+      );
+      await setLeetCodeActivityCache(user._id, {
+        leetcodeUsername: user.leetcodeUsername,
+        activity,
+        cached: false,
+      });
+    } catch (cacheErr) {
+      console.error("LeetCode activity write-through failed:", cacheErr.message);
+      await delLeetCodeActivityCache(user._id);
+    }
     
     res.json({ 
       message: 'LeetCode username updated successfully',
