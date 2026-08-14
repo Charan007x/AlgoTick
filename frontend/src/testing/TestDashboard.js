@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart3, Zap, Bot, TrendingUp, Link2, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Label, Sector, Cell } from 'recharts';
 import { questionsAPI, aiCoachAPI } from '../services/api';
@@ -12,6 +12,17 @@ const TestDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [activeDifficulty, setActiveDifficulty] = useState('Easy');
   const [refreshingCoach, setRefreshingCoach] = useState(false);
+  const [compactChart, setCompactChart] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < 640
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 639px)');
+    const update = () => setCompactChart(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   const statsQuery = useQuery({
     queryKey: queryKeys.dashboardStats(),
@@ -260,7 +271,10 @@ const TestDashboard = () => {
 
                     {/* Recharts Bar Chart */}
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={weeklyData}>
+                      <BarChart
+                        data={weeklyData}
+                        margin={{ top: 8, right: 8, left: compactChart ? 4 : 0, bottom: 4 }}
+                      >
                         <defs>
                           <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="rgb(52, 211, 153)" stopOpacity={0.9} />
@@ -285,15 +299,21 @@ const TestDashboard = () => {
                           dataKey="day" 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fill: '#9ca3af', fontSize: 12, fontWeight: 600 }}
+                          interval={0}
+                          padding={{ left: 8, right: 8 }}
+                          tick={{ fill: '#9ca3af', fontSize: compactChart ? 11 : 12, fontWeight: 600 }}
                           dy={10}
                         />
+                        {!compactChart && (
                         <YAxis 
+                          width={28}
                           axisLine={false}
                           tickLine={false}
+                          allowDecimals={false}
                           tick={{ fill: '#6b7280', fontSize: 11 }}
-                          dx={-10}
+                          tickMargin={4}
                         />
+                        )}
                         <Tooltip 
                           cursor={{ fill: 'rgba(45, 212, 191, 0.05)' }}
                           position={{ y: 0 }}
@@ -633,14 +653,6 @@ const TestDashboard = () => {
                         <span className="text-lg font-bold text-white">{item.count}</span>
                       </div>
                     ))}
-                  </div>
-
-                  {/* Total */}
-                  <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-gray-400 text-sm font-medium">Total Problems</span>
-                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">
-                      {difficultyData.reduce((sum, item) => sum + item.count, 0)}
-                    </span>
                   </div>
                 </div>
               </div>

@@ -406,12 +406,13 @@ function Landing() {
           </div>
           <p className="text-white/40 text-sm">
             © 2025-26 <span className="text-white">Algo</span><span className="text-[#61dca3]">Tick</span>
-            {' · '}
+            {' / GitHub - '}
+            <a href="https://github.com/Charan007x" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#61dca3] transition-colors duration-200">Charan007x</a>
+          </p>
+          <p className="mt-2 text-sm text-white/40">
             <Link to="/privacy" className="text-white/60 hover:text-[#61dca3] transition-colors duration-200">Privacy Policy</Link>
             {' · '}
             <Link to="/terms" className="text-white/60 hover:text-[#61dca3] transition-colors duration-200">Terms of Service</Link>
-            {' / GitHub - '}
-            <a href="https://github.com/Charan007x" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#61dca3] transition-colors duration-200">Charan007x</a>
           </p>
         </div>
       </footer>
