@@ -10,6 +10,7 @@ function Landing() {
   const [visibleCards, setVisibleCards] = useState([]);
   const [visibleSteps, setVisibleSteps] = useState([]);
   const [visibleSections, setVisibleSections] = useState([]);
+  const [marqueePaused, setMarqueePaused] = useState(false);
   const numberRefs = useRef([]);
   const cardRefs = useRef([]);
   const stepRefs = useRef([]);
@@ -270,12 +271,45 @@ function Landing() {
               Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">Serious Learners</span>
             </h2>
           </div>
+        </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div
+          className="sm:hidden overflow-hidden"
+          onPointerDown={() => setMarqueePaused(true)}
+          onPointerUp={() => setMarqueePaused(false)}
+          onPointerLeave={() => setMarqueePaused(false)}
+        >
+          <div
+            className={`flex w-max ${marqueePaused ? 'animate-marquee-paused' : 'animate-marquee'}`}
+          >
+            {[0, 1].map((copy) => (
+              <div key={copy} className="flex gap-4 pr-4">
+                {features.map((feature, index) => {
+                  const FeatureIcon = feature.Icon;
+                  return (
+                    <div
+                      key={`${copy}-${feature.title}-${index}`}
+                      className="shrink-0 w-[72vw] max-w-[240px]"
+                    >
+                      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 h-full flex flex-col items-center text-center">
+                        <div className="mb-3">
+                          <FeatureIcon className="w-9 h-9 text-[#61dca3]" strokeWidth={2} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white">{feature.title}</h3>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 md:gap-8 sm:max-w-7xl sm:mx-auto sm:px-6 lg:px-8">
             {features.map((feature, index) => {
               const delayClass = index < 3 ? '' : 'delay-300';
               const FeatureIcon = feature.Icon;
-              const isVisible = visibleCards.includes(index);
+              const isVisible = visibleCards.includes(index) || visibleSections.includes('features');
               
               return (
                 <div 
@@ -284,17 +318,16 @@ function Landing() {
                   data-cardindex={index}
                   className={isVisible ? `animate-card-fade ${delayClass}` : 'opacity-0'}
                 >
-                  <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-[#61dca3]/50 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#61dca3]/20 h-full">
-                    <div className="mb-3 sm:mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                      <FeatureIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#61dca3]" strokeWidth={2} />
+                  <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#61dca3]/50 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#61dca3]/20 h-full">
+                    <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                      <FeatureIcon className="w-12 h-12 text-[#61dca3]" strokeWidth={2} />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">{feature.title}</h3>
-                    <p className="text-sm sm:text-base text-white/60 leading-relaxed">{feature.description}</p>
+                    <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
+                    <p className="text-base text-white/60 leading-relaxed">{feature.description}</p>
                   </div>
                 </div>
               );
             })}
-          </div>
         </div>
       </section>
 
@@ -304,14 +337,14 @@ function Landing() {
           <div 
             ref={(el) => (sectionRefs.current[0] = el)}
             data-sectionindex="how-it-works"
-            className={`text-center mb-16 sm:mb-20 md:mb-24 ${visibleSections.includes('how-it-works') ? 'animate-card-fade' : 'opacity-0'}`}
+            className={`text-center mb-10 sm:mb-20 md:mb-24 ${visibleSections.includes('how-it-works') ? 'animate-card-fade' : 'opacity-0'}`}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
               How It <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#61dca3] to-[#61b3dc]">Works</span>
             </h2>
           </div>
 
-          <div className="space-y-16 sm:space-y-20 md:space-y-24">
+          <div className="space-y-10 sm:space-y-20 md:space-y-24">
             {[
               { num: '01', title: 'Add Questions', desc: 'Paste any LeetCode URL. We fetch title, difficulty, and tags automatically.' },
               { num: '02', title: 'Set LeetCode Profile', desc: 'Link your LeetCode username in settings for automatic verification.' },
@@ -323,14 +356,14 @@ function Landing() {
               return (
                 <div 
                   key={index}
-                  className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-8 md:gap-12 lg:gap-16`}
+                  className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-1 sm:gap-3 md:gap-6 lg:gap-8`}
                 >
-                  <div className={`flex-shrink-0 ${isReversed ? 'md:justify-start' : 'md:justify-end'} flex justify-center md:w-1/3`}>
+                  <div className={`flex-shrink-0 ${isReversed ? 'md:justify-start' : 'md:justify-end'} flex justify-center md:w-1/3 leading-none`}>
                     <span 
                       ref={(el) => (numberRefs.current[index] = el)}
                       data-index={index}
                       data-num={step.num}
-                      className={`step-number text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] font-bold ${
+                      className={`step-number text-7xl sm:text-8xl md:text-[10rem] lg:text-[12rem] font-bold leading-none ${
                         visibleNumbers.includes(index) ? 'step-number-solid' : ''
                       }`}
                       style={{ 
@@ -347,10 +380,10 @@ function Landing() {
                     data-stepindex={index}
                     className={`flex-1 text-center ${isReversed ? 'md:text-right' : 'md:text-left'} ${visibleSteps.includes(index) ? 'animate-card-fade delay-200' : 'opacity-0'}`}
                   >
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white sm:mb-4 -mt-1 sm:mt-0">
                       {step.title}
                     </h3>
-                    <p className={`text-base sm:text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto ${isReversed ? 'md:mr-0 md:ml-auto' : 'md:mx-0'}`}>
+                    <p className={`hidden sm:block text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto ${isReversed ? 'md:mr-0 md:ml-auto' : 'md:mx-0'}`}>
                       {step.desc}
                     </p>
                   </div>
