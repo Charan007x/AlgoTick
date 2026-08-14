@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Note = require('../models/Note');
 const authMiddleware = require('../middleware/auth');
+const {
+  getNotesCache,
+  setNotesCache,
+  delNotesCache,
+} = require('../services/cacheService');
 
 // All routes require authentication
 router.use(authMiddleware);
@@ -11,8 +16,15 @@ router.use(authMiddleware);
 // @access  Private
 router.get('/', async (req, res) => {
   try {
+    const cached = await getNotesCache(req.user.id);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const notes = await Note.find({ userId: req.user.id }).sort({ createdAt: -1 });
-    res.json({ notes });
+    const payload = { notes };
+    await setNotesCache(req.user.id, notes);
+    res.json(payload);
   } catch (error) {
     console.error('Get notes error:', error);
     res.status(500).json({ message: 'Failed to retrieve notes' });
@@ -59,6 +71,7 @@ router.post('/', async (req, res) => {
     
     const newNote = new Note(noteData);
     await newNote.save();
+    await delNotesCache(req.user.id);
     
     res.status(201).json({ 
       message: 'Note created successfully', 
@@ -96,7 +109,8 @@ router.put('/:id', async (req, res) => {
     }
     
     await note.save();
-    
+    await delNotesCache(req.user.id);
+
     res.json({ 
       message: 'Note updated successfully', 
       note 
@@ -122,6 +136,7 @@ router.delete('/:id', async (req, res) => {
     }
     
     await Note.deleteOne({ _id: req.params.id });
+    await delNotesCache(req.user.id);
     
     res.json({ message: 'Note deleted successfully' });
   } catch (error) {

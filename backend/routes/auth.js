@@ -6,6 +6,7 @@ const User = require('../models/User');
 const passport = require('../config/passport');
 const { syncAllUsersLeetCodeData, syncSpecificUser } = require('../services/leetcodeSyncCron');
 const authMiddleware = require('../middleware/auth');
+const { delLeetCodeActivityCache } = require('../services/cacheService');
 
 // @route   POST /api/auth/signup
 // @desc    Register a new user
@@ -186,6 +187,7 @@ router.put('/leetcode-username', async (req, res) => {
     
     user.leetcodeUsername = leetcodeUsername.trim();
     await user.save();
+    await delLeetCodeActivityCache(user._id);
     
     res.json({ 
       message: 'LeetCode username updated successfully',

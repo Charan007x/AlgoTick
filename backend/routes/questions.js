@@ -15,6 +15,13 @@ const {
   getDashboardStatsCached,
   refreshDashboardStatsCache,
 } = require("../services/dashboardStatsService");
+const {
+  getQuestionsListCache,
+  setQuestionsListCache,
+  delQuestionsListCache,
+  getLeetCodeActivityCache,
+  setLeetCodeActivityCache,
+} = require("../services/cacheService");
 
 // All routes require authentication
 router.use(authMiddleware);
@@ -61,6 +68,7 @@ router.post("/", async (req, res) => {
 
         await existingQuestion.save();
         await refreshDashboardStatsCache(req.user.id);
+        await delQuestionsListCache(req.user.id);
 
         return res.status(200).json({
           message: "Question restored successfully",
@@ -89,6 +97,7 @@ router.post("/", async (req, res) => {
 
     await newQuestion.save();
     await refreshDashboardStatsCache(req.user.id);
+    await delQuestionsListCache(req.user.id);
 
     res.status(201).json({
       message: "Question added successfully",
@@ -109,6 +118,16 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const { filter, sortBy, revisedTimeFilter } = req.query;
+
+    const cached = await getQuestionsListCache(
+      req.user.id,
+      filter,
+      sortBy,
+      revisedTimeFilter,
+    );
+    if (cached) {
+      return res.json(cached);
+    }
 
     let query = { userId: req.user.id, isDeleted: false };
 
@@ -172,7 +191,15 @@ router.get("/", async (req, res) => {
 
     const questions = await Question.find(query).sort(sortOption);
 
-    res.json({ questions });
+    const payload = { questions };
+    await setQuestionsListCache(
+      req.user.id,
+      filter,
+      sortBy,
+      revisedTimeFilter,
+      questions,
+    );
+    res.json(payload);
   } catch (error) {
     console.error("Get questions error:", error);
     res.status(500).json({ message: "Failed to retrieve questions" });
@@ -213,6 +240,13 @@ router.get("/leetcode-activity", async (req, res) => {
     // Check if force refresh is requested
     const forceRefresh = req.query.refresh === "true";
 
+    if (!forceRefresh) {
+      const cached = await getLeetCodeActivityCache(req.user.id);
+      if (cached) {
+        return res.json(cached);
+      }
+    }
+
     console.log(
       "Fetching LeetCode activity for user:",
       user.leetcodeUsername,
@@ -225,11 +259,13 @@ router.get("/leetcode-activity", async (req, res) => {
       forceRefresh,
     );
 
-    res.json({
+    const payload = {
       leetcodeUsername: user.leetcodeUsername,
       activity,
       cached: !forceRefresh,
-    });
+    };
+    await setLeetCodeActivityCache(req.user.id, payload);
+    res.json(payload);
   } catch (error) {
     console.error("LeetCode activity error:", error.message);
     console.error("Error stack:", error.stack);
@@ -312,6 +348,7 @@ router.put("/:id/revise", async (req, res) => {
     question.markRevised();
     await question.save();
     await refreshDashboardStatsCache(req.user.id);
+    await delQuestionsListCache(req.user.id);
 
     console.log(`✅ Verified and marked as revised: "${question.title}"`);
 
@@ -374,6 +411,7 @@ router.delete("/:id", async (req, res) => {
     }
 
     await refreshDashboardStatsCache(req.user.id);
+    await delQuestionsListCache(req.user.id);
     res.json({ message: "Question removed successfully" });
   } catch (error) {
     console.error("Delete question error:", error);

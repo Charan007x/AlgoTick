@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { queryClient } from '../lib/queryClient';
 
 const AuthContext = createContext(null);
 
@@ -112,6 +113,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    queryClient.clear();
     setToken(null);
     setUser(null);
   };

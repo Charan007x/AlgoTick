@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './context/AuthContext';
+import AppLayout from './components/AppLayout';
 import { ToastProvider } from './context/ToastContext';
 import { ConfirmProvider } from './context/ConfirmContext';
 import Toast from './components/Toast';
@@ -28,6 +31,7 @@ import './index.css';
 
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ToastProvider>
         <ConfirmProvider>
@@ -42,99 +46,27 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/test-auth" element={<TestAuth />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/lists"
-            element={
-              <PrivateRoute>
-                <CustomLists />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/notes"
-            element={
-              <PrivateRoute>
-                <Notes />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <PrivateRoute>
-                <Notifications />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/notifications"
-            element={
-              <PrivateRoute>
-                <AdminNotifications />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <Settings />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/labs"
-            element={
-              <PrivateRoute>
-                <Labs />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/home"
-            element={
-              <PrivateRoute>
-                <TestDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <Admin />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <PrivateRoute>
-                <UserManagement />
-              </PrivateRoute>
-            }
-          />
+          <Route element={<PrivateRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/home" element={<TestDashboard />} />
+              <Route path="/lists" element={<CustomLists />} />
+              <Route path="/notes" element={<Notes />} />
+              <Route path="/labs" element={<Labs />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/notifications" element={<Notifications />} />
+            </Route>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+          </Route>
         </Routes>
       </Router>
       </ConfirmProvider>
       </ToastProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
