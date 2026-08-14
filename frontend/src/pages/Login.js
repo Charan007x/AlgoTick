@@ -152,6 +152,11 @@ const Login = () => {
                 Sign up here
               </Link>
             </p>
+            <p className="mt-3 text-xs text-white/40">
+              <Link to="/privacy" className="hover:text-[#61dca3]">Privacy Policy</Link>
+              {' · '}
+              <Link to="/terms" className="hover:text-[#61dca3]">Terms of Service</Link>
+            </p>
           </div>
         </div>
       </div>

@@ -200,6 +200,12 @@ const Signup = () => {
                 Sign in here
               </Link>
             </p>
+            <p className="mt-3 text-xs text-white/40">
+              By continuing, you agree to our{' '}
+              <Link to="/terms" className="text-white/60 hover:text-[#61dca3]">Terms of Service</Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="text-white/60 hover:text-[#61dca3]">Privacy Policy</Link>.
+            </p>
           </div>
         </div>
       </div>

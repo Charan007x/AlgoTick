@@ -3,12 +3,18 @@
   "outputDirectory": "build",
   "framework": "create-react-app",
   "installCommand": "npm ci",
-  "routes": [
+  "rewrites": [
+    { "source": "/((?!static/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
     {
-      "src": "/static/(.*)",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }
