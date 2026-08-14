@@ -92,8 +92,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
-app.use(express.json({ limit: "Infinity" }));
-app.use(express.urlencoded({ extended: true, limit: "Infinity" }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 
 // Session configuration (required for Passport)

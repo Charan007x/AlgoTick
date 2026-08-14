@@ -33,11 +33,11 @@ const AdminAlgorithms = () => {
     },
   });
 
-  const folders = data?.folders || [];
-  const algorithms = data?.algorithms || [];
+  const folders = data?.folders ?? [];
+  const algorithms = data?.algorithms ?? [];
   const tree = useMemo(
-    () => buildAlgorithmTree(folders, algorithms),
-    [folders, algorithms],
+    () => buildAlgorithmTree(data?.folders || [], data?.algorithms || []),
+    [data],
   );
   const folderOptions = useMemo(() => flattenFolders(tree), [tree]);
 
